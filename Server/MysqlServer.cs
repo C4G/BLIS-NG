@@ -8,13 +8,23 @@ public class MySqlServer
     Directory.GetCurrentDirectory(),
     "server", "mysql", "bin", "mysql.exe");
 
+  private readonly string ConfigPath = Path.Combine(
+    Directory.GetCurrentDirectory(),
+    "config", "my.cnf"
+  );
+
+  private readonly string DataDir = Path.Combine(
+    Directory.GetCurrentDirectory(),
+    "dbdir"
+  );
+
   private readonly Process process;
 
   public MySqlServer()
   {
     process = new Process();
     process.StartInfo.FileName = ExePath;
-    process.StartInfo.Arguments = "--help";
+    process.StartInfo.Arguments = $"--defaults-file=\"{ConfigPath}\" --console --datadir=\"{DataDir}\"";
     process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
   }
 
@@ -25,6 +35,7 @@ public class MySqlServer
 
   public void Stop()
   {
+    process.Kill();
     process.WaitForExit();
   }
 }

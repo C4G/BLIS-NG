@@ -1,12 +1,12 @@
 using Avalonia.Controls;
 
-namespace BLIS_NG.Views
+namespace BLIS_NG.Views;
+
+public partial class MainWindow : Window
 {
-    public partial class MainWindow : Window
-    {
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
-    }
+  public MainWindow()
+  {
+    InitializeComponent();
+  }
 }
+

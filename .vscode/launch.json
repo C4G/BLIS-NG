@@ -1,16 +1,16 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "request": "launch",
-            "name": "Launch",
-            "type": "coreclr",
-            "cwd": "${workspaceFolder}/test/",
-            "preLaunchTask": "dotnet: build",
-            "program": "${workspaceFolder}/bin/Debug/net9.0/BLIS-NG.dll",
-        }
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "request": "launch",
+      "name": "Launch",
+      "type": "coreclr",
+      "cwd": "${workspaceFolder}/test/",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/bin/Debug/net9.0/BLIS-NG.dll",
+    }
+  ]
 }

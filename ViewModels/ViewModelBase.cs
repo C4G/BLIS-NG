@@ -1,8 +1,7 @@
 using ReactiveUI;
 
-namespace BLIS_NG.ViewModels
+namespace BLIS_NG.ViewModels;
+
+public class ViewModelBase : ReactiveObject
 {
-    public class ViewModelBase : ReactiveObject
-    {
-    }
 }

@@ -5,6 +5,9 @@
              x:Class="BLIS_NG.App">
 
     <Application.Styles>
-        <FluentTheme />
+        <!-- This just makes me happy. It's probably not wise to use an old-looking theme
+             if it's expected that people take this seriously...
+        -->
+        <ClassicTheme FontAliasing="False" />
     </Application.Styles>
 </Application>
