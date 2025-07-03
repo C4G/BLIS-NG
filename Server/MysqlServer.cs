@@ -9,23 +9,22 @@ namespace BLIS_NG.server;
 public class MySqlServer : BaseProcess
 {
   private readonly string MysqldPath = Path.Combine(
-    Directory.GetCurrentDirectory(),
-    "server", "mysql", "bin", "mysqld.exe");
+    ConfigurationFile.SERVER_BASE_DIR, "mysql", "bin", "mysqld.exe");
 
   private readonly string MysqlAdminPath = Path.Combine(
-    Directory.GetCurrentDirectory(),
-    "server", "mysql", "bin", "mysqladmin.exe"
+    ConfigurationFile.SERVER_BASE_DIR, "mysql", "bin", "mysqladmin.exe"
   );
 
   private readonly string ConfigPath = Path.Combine(
-    Directory.GetCurrentDirectory(),
-    "config", "my.cnf"
+    ConfigurationFile.RUN_DIR, "my.ini"
   );
 
   private readonly string DataDir = Path.Combine(
     Directory.GetCurrentDirectory(),
     "dbdir"
   );
+
+  private readonly MySqlIni mySqlIni = new();
 
   private readonly Process process;
 
@@ -47,6 +46,8 @@ public class MySqlServer : BaseProcess
 
   public override async Task<ProcessResult> Run(Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default)
   {
+    mySqlIni.Write();
+
     var outputCloseEvent = new TaskCompletionSource<bool>();
     process.OutputDataReceived += (s, e) =>
     {
