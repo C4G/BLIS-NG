@@ -29,5 +29,6 @@
         </TextBlock>
         <TextBlock TextAlignment="Center" FontSize="18" Text="{Binding AppVersion}" />
         <Button Margin="0 64 0 0" Width="120" Command="{Binding StartServerCommand}">Start Server</Button>
+        <Button Margin="0 64 0 0" Width="120" Command="{Binding StopServerCommand}">Stop Server</Button>
     </StackPanel>
 </Window>

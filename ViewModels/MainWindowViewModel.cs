@@ -1,7 +1,9 @@
+using Microsoft.Extensions.Logging;
+
 namespace BLIS_NG.ViewModels
 {
-  public class MainWindowViewModel : ViewModelBase
+  public class MainWindowViewModel(ILoggerFactory loggerFactory) : ViewModelBase
   {
-    public ServerControlViewModel ServerControlViewModel { get; } = new ServerControlViewModel();
+    public ServerControlViewModel ServerControlViewModel { get; } = new ServerControlViewModel(loggerFactory);
   }
 }

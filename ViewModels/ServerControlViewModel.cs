@@ -1,32 +1,45 @@
-using System.Diagnostics;
 using System.Reactive;
 using BLIS_NG.server;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 
 namespace BLIS_NG.ViewModels;
 
 public class ServerControlViewModel
 {
-  public string AppVersion { get { return "4.0"; } }
+  public static string AppVersion { get { return "4.0"; } }
 
-  public MySqlServer mySqlServer = new();
+  private readonly MySqlServer mySqlServer;
+  private Task? mysqlServerTask;
 
   public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
+  public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
 
-  public ServerControlViewModel()
+  public ServerControlViewModel(ILoggerFactory loggerFactory)
   {
-    StartServerCommand = ReactiveCommand.Create(HandleButtonClick);
+    mySqlServer = new(loggerFactory);
+
+    StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
+    StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
   }
 
-  public void HandleButtonClick()
+  public void HandleStartButtonClick()
   {
-    if (!mySqlServer.IsRunning)
+    if (mysqlServerTask == null && !mySqlServer.IsRunning)
     {
-      mySqlServer.Run((s) => Debug.WriteLine(s), (e) => Debug.WriteLine(e));
+      mysqlServerTask = mySqlServer.Run();
     }
-    else
+  }
+
+  public async void HandleStopButtonClick()
+  {
+    // TODO: Need some kind of timeout here
+
+    if (mysqlServerTask != null)
     {
-      Debug.WriteLine("Server is already running.");
+      mySqlServer.Stop();
+      await mysqlServerTask;
+      mysqlServerTask = null;
     }
   }
 }

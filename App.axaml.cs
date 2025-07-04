@@ -3,11 +3,15 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using BLIS_NG.ViewModels;
 using BLIS_NG.Views;
+using Microsoft.Extensions.Logging;
 
 namespace BLIS_NG;
 
 public partial class App : Application
 {
+  private readonly ILoggerFactory loggerFactory = LoggerFactory.Create((builder) =>
+    builder.AddDebug());
+
   public override void Initialize()
   {
     AvaloniaXamlLoader.Load(this);
@@ -19,7 +23,7 @@ public partial class App : Application
     {
       desktop.MainWindow = new MainWindow
       {
-        DataContext = new MainWindowViewModel(),
+        DataContext = new MainWindowViewModel(loggerFactory),
       };
     }
 
