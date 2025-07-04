@@ -21,12 +21,11 @@ public class MySqlServer(ILoggerFactory loggerFactory) : BaseProcess(nameof(MySq
 
   private readonly MySqlIni mySqlIni = new();
   private readonly MySqlAdmin mySqlAdmin = new(loggerFactory);
-  private readonly ILogger<MySqlServer> logger = loggerFactory.CreateLogger<MySqlServer>();
 
-  public override async Task<ProcessResult> Run(CancellationToken cancellationToken = default)
+  public override async Task<ProcessResult> Run(Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default)
   {
     mySqlIni.Write();
-    return await Execute(MysqldPath, Arguments, (stdout) => logger.LogInformation("{Message}", stdout), (stderr) => logger.LogWarning("{Message}", stderr), cancellationToken);
+    return await Execute(MysqldPath, Arguments, stdOutConsumer, stdErrConsumer, cancellationToken);
   }
 
   public override async void Stop()

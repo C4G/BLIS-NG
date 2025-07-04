@@ -13,7 +13,7 @@ public record ProcessResult(int ExitCode)
 
 public interface IExternalProcess : IDisposable
 {
-  public Task<ProcessResult> Run(CancellationToken cancellationToken = default);
+  public Task<ProcessResult> Run(Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default);
   public void Stop();
 }
 
@@ -26,7 +26,7 @@ public abstract class BaseProcess(string ProcessName, ILoggerFactory loggerFacto
   private Process? process;
   public bool IsRunning { get => process != null; }
 
-  public abstract Task<ProcessResult> Run(CancellationToken cancellationToken = default);
+  public abstract Task<ProcessResult> Run(Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default);
 
   internal async Task<ProcessResult> Execute(string exePath, string arguments, Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default)
   {

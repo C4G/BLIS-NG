@@ -16,7 +16,7 @@ public class MySqlAdmin(ILoggerFactory loggerFactory) : BaseProcess(nameof(MySql
   private readonly ILogger<MySqlAdmin> logger = loggerFactory.CreateLogger<MySqlAdmin>();
   private readonly string baseArguments = $"-u{MySqlIni.MYSQL_ROOT_USER} -p{MySqlIni.MYSQL_ROOT_PASSWORD} -h {MySqlIni.MYSQL_BIND_ADDRESS} --port {MySqlIni.MYSQL_PORT}";
 
-  public override Task<ProcessResult> Run(CancellationToken cancellationToken = default)
+  public override Task<ProcessResult> Run(Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default)
   {
     throw new NotImplementedException();
   }

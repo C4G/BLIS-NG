@@ -31,5 +31,7 @@
         <TextBlock TextAlignment="Center" FontSize="18" Text="{Binding AppVersion}" />
         <Button Margin="0 64 0 0" Width="160" Command="{Binding StartServerCommand}">Start MySQL Server</Button>
         <Button Margin="0 0 0 0" Width="160" Command="{Binding StopServerCommand}">Stop MySQL Server</Button>
+
+        <TextBox Height="100" IsReadOnly="True" TextWrapping="NoWrap" VerticalContentAlignment="Top" />
     </StackPanel>
 </Window>
