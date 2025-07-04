@@ -1,6 +1,6 @@
 using System.Reactive;
+using BLIS_NG.Config;
 using BLIS_NG.server;
-using Microsoft.Extensions.Logging;
 using ReactiveUI;
 
 namespace BLIS_NG.ViewModels;
@@ -15,9 +15,9 @@ public class ServerControlViewModel
   public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
   public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
 
-  public ServerControlViewModel(ILoggerFactory loggerFactory)
+  public ServerControlViewModel()
   {
-    mySqlServer = new(loggerFactory);
+    mySqlServer = new(AppConfig.CreateLoggerFactory());
 
     StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
     StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
@@ -35,9 +35,9 @@ public class ServerControlViewModel
   {
     // TODO: Need some kind of timeout here
 
+    mySqlServer.Stop();
     if (mysqlServerTask != null)
     {
-      mySqlServer.Stop();
       await mysqlServerTask;
       mysqlServerTask = null;
     }

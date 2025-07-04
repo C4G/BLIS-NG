@@ -10,7 +10,8 @@
         Title="BLIS_NG"
         Padding="10"
         Height="480"
-        Width="640">
+        Width="640"
+        CanResize="False">
 
 	<!--We are using Compiled bindings. This is not mandatory but makes life easier. Read more about it here:-->
 	<!-- https://docs.avaloniaui.net/docs/basics/data/data-binding/compiled-bindings -->
@@ -28,7 +29,7 @@
             BLIS For Windows
         </TextBlock>
         <TextBlock TextAlignment="Center" FontSize="18" Text="{Binding AppVersion}" />
-        <Button Margin="0 64 0 0" Width="120" Command="{Binding StartServerCommand}">Start Server</Button>
-        <Button Margin="0 64 0 0" Width="120" Command="{Binding StopServerCommand}">Stop Server</Button>
+        <Button Margin="0 64 0 0" Width="160" Command="{Binding StartServerCommand}">Start MySQL Server</Button>
+        <Button Margin="0 0 0 0" Width="160" Command="{Binding StopServerCommand}">Stop MySQL Server</Button>
     </StackPanel>
 </Window>

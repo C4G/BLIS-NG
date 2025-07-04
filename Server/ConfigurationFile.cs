@@ -2,7 +2,7 @@ using Fluid;
 
 namespace BLIS_NG.Server;
 
-public abstract class ConfigurationFile
+public abstract class ConfigurationFile(string templatePath)
 {
   public static readonly string CONFIG_BASE_DIR = Path.Combine(Directory.GetCurrentDirectory(), "config");
   public static readonly string SERVER_BASE_DIR = Path.Combine(Directory.GetCurrentDirectory(), "server");
@@ -10,14 +10,9 @@ public abstract class ConfigurationFile
   public static readonly string RUN_DIR = Path.Combine(Directory.GetCurrentDirectory(), "run");
 
   private readonly FluidParser parser = new();
-  private readonly IFluidTemplate template;
+  private readonly string templatePath = templatePath;
 
-  public ConfigurationFile(string templatePath)
-  {
-    template = parser.Parse(File.ReadAllText(templatePath));
-  }
-
-  private string RenderTemplate(IDictionary<string, string> data)
+  private static string RenderTemplate(IFluidTemplate template, IDictionary<string, string> data)
   {
     TemplateContext context = new();
     foreach (var (key, value) in data)
@@ -30,7 +25,8 @@ public abstract class ConfigurationFile
 
   protected void GenerateConfiguration(string path, IDictionary<string, string>? data = null)
   {
-    var rendered = RenderTemplate(data ?? new Dictionary<string, string>());
+    var template = parser.Parse(File.ReadAllText(templatePath));
+    var rendered = RenderTemplate(template, data ?? new Dictionary<string, string>());
     File.WriteAllText(path, rendered);
   }
 

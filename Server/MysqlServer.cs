@@ -8,10 +8,6 @@ public class MySqlServer(ILoggerFactory loggerFactory) : BaseProcess(nameof(MySq
   private static readonly string MysqldPath = Path.Combine(
     ConfigurationFile.SERVER_BASE_DIR, "mysql", "bin", "mysqld.exe");
 
-  private static readonly string MysqlAdminPath = Path.Combine(
-    ConfigurationFile.SERVER_BASE_DIR, "mysql", "bin", "mysqladmin.exe"
-  );
-
   private static readonly string ConfigPath = Path.Combine(
     ConfigurationFile.RUN_DIR, "my.ini"
   );
