@@ -1,4 +1,5 @@
 using System.Reactive;
+using System.Runtime.InteropServices;
 using Avalonia.Logging;
 using BLIS_NG.Config;
 using BLIS_NG.server;
@@ -15,6 +16,12 @@ public class ServerControlViewModel
   private readonly MySqlServer mySqlServer;
   private Task? mysqlServerTask;
 
+  private readonly Apache2Server apache2Server;
+  private Task? apacheServerTask;
+
+  private readonly Action<string> stdOutLogger;
+  private readonly Action<string> stdErrLogger;
+
   public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
   public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
 
@@ -24,7 +31,11 @@ public class ServerControlViewModel
   {
     var loggerFactory = AppConfig.CreateLoggerFactory();
     mySqlServer = new(loggerFactory);
+    apache2Server = new(loggerFactory);
+
     logger = loggerFactory.CreateLogger<ServerControlViewModel>();
+    stdOutLogger = (m) => logger.LogInformation("{}", m);
+    stdErrLogger = (m) => logger.LogWarning("{}", m);
 
     StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
     StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
@@ -34,24 +45,25 @@ public class ServerControlViewModel
   {
     if (mysqlServerTask == null && !mySqlServer.IsRunning)
     {
-      mysqlServerTask = mySqlServer.Run(
-        (stdout) =>
-        {
-          logger.LogInformation("{}", stdout);
-          ServerLog += stdout;
-        },
-        (stderr) =>
-        {
-          logger.LogError("{}", stderr);
-          ServerLog += stderr;
-        }
-      );
+      mysqlServerTask = mySqlServer.Run(stdOutLogger, stdErrLogger);
+    }
+
+    if (apacheServerTask == null && !apache2Server.IsRunning)
+    {
+      apacheServerTask = apache2Server.Run(stdOutLogger, stdErrLogger);
     }
   }
 
   public async void HandleStopButtonClick()
   {
     // TODO: Need some kind of timeout here
+
+    apache2Server.Stop();
+    if (apacheServerTask != null)
+    {
+      await apacheServerTask;
+      apacheServerTask = null;
+    }
 
     mySqlServer.Stop();
     if (mysqlServerTask != null)

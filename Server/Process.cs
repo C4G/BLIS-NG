@@ -109,6 +109,11 @@ public abstract class BaseProcess(string ProcessName, ILoggerFactory loggerFacto
   }
   public abstract void Stop();
 
+  protected void Kill()
+  {
+    process?.Kill();
+  }
+
   public void Dispose()
   {
     Stop();
