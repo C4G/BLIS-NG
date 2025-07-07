@@ -3,13 +3,13 @@
         xmlns:vm="using:BLIS_NG.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="480"
+        mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="360"
         x:CompileBindings="True"
 		x:DataType="vm:MainWindowViewModel"
         x:Class="BLIS_NG.Views.MainWindow"
-        Title="BLIS_NG"
+        Title="{Binding WindowTitle}"
         Padding="10"
-        Height="480"
+        Height="360"
         Width="640"
         CanResize="False">
 
@@ -20,18 +20,66 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-	<StackPanel DataContext="{Binding ServerControlViewModel}" Spacing="10">
+	<Grid 
+        DataContext="{Binding ServerControlViewModel}" 
+        ColumnDefinitions="*,*,*,*,*"
+        RowDefinitions="*,*,*,*,*"
+    >
 		<TextBlock 
-            TextAlignment="Center" 
-            FontWeight="Bold"
-            FontSize="24"
+            TextAlignment="Left" 
+            FontWeight="Normal"
+            FontSize="36"
+            VerticalAlignment="Center"
+            Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="5"
         >
-            BLIS For Windows
+            Basic Lab Information System (BLIS)
         </TextBlock>
-        <TextBlock TextAlignment="Center" FontSize="18" Text="{Binding AppVersion}" />
-        <Button Margin="0 64 0 0" Width="160" Command="{Binding StartServerCommand}">Start MySQL Server</Button>
-        <Button Margin="0 0 0 0" Width="160" Command="{Binding StopServerCommand}">Stop MySQL Server</Button>
 
-        <TextBox Height="100" IsReadOnly="True" TextWrapping="NoWrap" VerticalContentAlignment="Top" />
-    </StackPanel>
+        <TextBlock 
+            TextAlignment="Left" 
+            FontSize="18" 
+            Text="{Binding AppVersion}"
+            VerticalAlignment="Top"
+            Grid.Row="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="5"
+        />
+
+        <TextBlock
+            FontSize="24"
+            FontFamily="Times New Roman"
+            Foreground="#00AA00"
+            VerticalAlignment="Bottom"
+            Grid.Row="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="5"
+        >
+            A Joint Initiative of<LineBreak/>
+            C4G at Georgia Tech, the CDC, and participating countries.
+        </TextBlock>
+
+        <TextBlock
+            FontSize="12"
+            FontFamily="Times New Roman"
+            Margin="0 36 0 0"
+            Grid.Column="0"
+            Grid.Row="3"
+            Grid.ColumnSpan="5"
+        >
+            C4G BLIS has been licensed under the GNU General Public License version 3. For more information, visit blis.cc.gatech.edu.
+        </TextBlock>
+
+        <StackPanel
+            Orientation="Horizontal"
+            Spacing="15"
+            Grid.Row="4"
+            Grid.Column="2"
+            Grid.ColumnSpan="3"
+        >
+            <Button Width="160" Command="{Binding StartServerCommand}">Start BLIS</Button>
+            <Button Width="160" Command="{Binding StopServerCommand}">Stop BLIS</Button>
+        </StackPanel>
+    </Grid>
 </Window>

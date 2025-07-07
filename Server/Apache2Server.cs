@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using BLIS_NG.Server;
 using Microsoft.Extensions.Logging;
 
@@ -12,7 +13,7 @@ public class Apache2Server(ILoggerFactory loggerFactory) : BaseProcess(nameof(Ap
     ConfigurationFile.RUN_DIR, "httpd.conf"
   );
 
-  private static readonly string Arguments = $"-f \"{ConfigPath}\"";
+  private static readonly string Arguments = $"-f \"{ConfigPath}\" -e debug";
 
   private readonly HttpdConf httpdConf = new();
 
@@ -24,6 +25,11 @@ public class Apache2Server(ILoggerFactory loggerFactory) : BaseProcess(nameof(Ap
 
   public override void Stop()
   {
-    Kill();
+    // httpd.exe doesn't seem to like clean shutdowns when it's not started
+    // as a service.
+    // Force it closed here and remove the .pid file.
+    Process.Start("taskkill", "/F /IM httpd.exe /T");
+    Thread.Sleep(1000);
+    File.Delete(Path.Combine(ConfigurationFile.RUN_DIR, "httpd.pid"));
   }
 }

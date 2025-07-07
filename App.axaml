@@ -8,6 +8,6 @@
         <!-- This just makes me happy. It's probably not wise to use an old-looking theme
              if it's expected that people take this seriously...
         -->
-        <ClassicTheme FontAliasing="False" />
+        <FluentTheme/>
     </Application.Styles>
 </Application>

@@ -1,6 +1,4 @@
 using System.Reactive;
-using System.Runtime.InteropServices;
-using Avalonia.Logging;
 using BLIS_NG.Config;
 using BLIS_NG.server;
 using Microsoft.Extensions.Logging;
@@ -10,7 +8,8 @@ namespace BLIS_NG.ViewModels;
 
 public class ServerControlViewModel
 {
-  public static string AppVersion { get { return "4.0"; } }
+  private const string AppVersionNumber = "4.0";
+  public static string AppVersion { get { return $"BLIS for Windows {AppVersionNumber}"; } }
 
   private readonly ILogger<ServerControlViewModel> logger;
   private readonly MySqlServer mySqlServer;
