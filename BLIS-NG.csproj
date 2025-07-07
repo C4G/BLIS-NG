@@ -7,11 +7,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <!--Avalonia
-    doesn't support TrimMode=link currently,but we are working on that
-    https://github.com/AvaloniaUI/Avalonia/issues/6892 -->
-    <TrimMode>copyused</TrimMode>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <PublishAot>true</PublishAot>
+    <TrimMode>link</TrimMode>
+    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+    <TrimmerSingleWarn>true</TrimmerSingleWarn>
   </PropertyGroup>
 
   <ItemGroup>
