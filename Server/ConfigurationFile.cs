@@ -6,7 +6,6 @@ namespace BLIS_NG.Server;
 
 public abstract class ConfigurationFile(Uri templatePath)
 {
-  public static readonly string CONFIG_BASE_DIR = Path.Combine(Directory.GetCurrentDirectory(), "config");
   public static readonly string SERVER_BASE_DIR = Path.Combine(Directory.GetCurrentDirectory(), "server");
   public static readonly string TMP_DIR = Path.Combine(Directory.GetCurrentDirectory(), "tmp");
   public static readonly string RUN_DIR = Path.Combine(Directory.GetCurrentDirectory(), "run");
@@ -34,6 +33,12 @@ public abstract class ConfigurationFile(Uri templatePath)
   }
 
   public abstract void Write();
+
+  public static void MakeRequiredDirectories()
+  {
+    Directory.CreateDirectory(RUN_DIR);
+    Directory.CreateDirectory(TMP_DIR);
+  }
 
   private string ReadTemplate(Uri path)
   {

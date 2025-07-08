@@ -1,5 +1,6 @@
 using System.Reactive;
 using BLIS_NG.server;
+using BLIS_NG.Server;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 
@@ -40,6 +41,8 @@ public class ServerControlViewModel
 
   public void HandleStartButtonClick()
   {
+    ConfigurationFile.MakeRequiredDirectories();
+
     if (mysqlServerTask == null && !mySqlServer.IsRunning)
     {
       mysqlServerTask = mySqlServer.Run(stdOutLogger, stdErrLogger);
