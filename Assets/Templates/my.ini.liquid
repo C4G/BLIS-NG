@@ -1,0 +1,25 @@
+[mysqld]
+basedir="{{ server_dir }}\\MySQL"
+bind-address={{ mysql_ip }}
+datadir="{{ mysql_datadir }}"
+default-character-set=latin1
+default-collation=latin1_general_ci
+log-error="{{ tmp_dir }}\\log.err"
+pid-file="{{ tmp_dir }}\\mysql.pid"
+#slow query log#=
+tmpdir="{{ tmp_dir }}"
+port={{ mysql_port }}
+#set-variable=key_buffer=16M
+
+# Uncomment the following if you are using InnoDB tables
+innodb_data_home_dir = "{{ mysql_datadir }}"
+innodb_data_file_path = ibdata1:10M:autoextend
+innodb_log_group_home_dir = "{{ mysql_datadir }}"
+innodb_log_arch_dir = "{{ mysql_datadir }}"
+innodb_buffer_pool_size = 256M
+innodb_additional_mem_pool_size = 20M
+innodb_log_file_size = 64M
+innodb_log_buffer_size = 8M
+innodb_flush_log_at_trx_commit = 1
+innodb_lock_wait_timeout = 50
+innodb_file_per_table = 1

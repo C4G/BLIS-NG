@@ -15,7 +15,7 @@ public class MySqlIni : ConfigurationFile
   public static readonly string MYSQL_DBDIR =
     Path.Combine(Directory.GetCurrentDirectory(), "dbdir");
 
-  public MySqlIni() : base(Path.Combine(CONFIG_BASE_DIR, "my.ini.liquid"))
+  public MySqlIni() : base(new Uri("avares://BLIS-NG/Assets/Templates/my.ini.liquid"))
   { }
 
   public override void Write()

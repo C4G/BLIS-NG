@@ -13,7 +13,7 @@ public class HttpdConf : ConfigurationFile
   public static readonly string LOG_DIRECTORY =
     Path.Combine(DOCROOT, "logs");
 
-  public HttpdConf() : base(Path.Combine(CONFIG_BASE_DIR, "httpd.conf.liquid"))
+  public HttpdConf() : base(new Uri("avares://BLIS-NG/Assets/Templates/httpd.conf.liquid"))
   { }
 
   public override void Write()

@@ -1,8 +1,10 @@
+using System.Text;
+using Avalonia.Platform;
 using Fluid;
 
 namespace BLIS_NG.Server;
 
-public abstract class ConfigurationFile(string templatePath)
+public abstract class ConfigurationFile(Uri templatePath)
 {
   public static readonly string CONFIG_BASE_DIR = Path.Combine(Directory.GetCurrentDirectory(), "config");
   public static readonly string SERVER_BASE_DIR = Path.Combine(Directory.GetCurrentDirectory(), "server");
@@ -10,7 +12,7 @@ public abstract class ConfigurationFile(string templatePath)
   public static readonly string RUN_DIR = Path.Combine(Directory.GetCurrentDirectory(), "run");
 
   private readonly FluidParser parser = new();
-  private readonly string templatePath = templatePath;
+  private readonly Uri templatePath = templatePath;
 
   private static string RenderTemplate(IFluidTemplate template, IDictionary<string, string> data)
   {
@@ -25,10 +27,31 @@ public abstract class ConfigurationFile(string templatePath)
 
   protected void GenerateConfiguration(string path, IDictionary<string, string>? data = null)
   {
-    var template = parser.Parse(File.ReadAllText(templatePath));
+    var templateContents = ReadTemplate(templatePath);
+    var template = parser.Parse(templateContents);
     var rendered = RenderTemplate(template, data ?? new Dictionary<string, string>());
     File.WriteAllText(path, rendered);
   }
 
   public abstract void Write();
+
+  private string ReadTemplate(Uri path)
+  {
+    var templateBuilder = new StringBuilder();
+
+    using var stream = AssetLoader.Open(templatePath);
+    using var streamReader = new StreamReader(stream);
+    while (!streamReader.EndOfStream)
+    {
+      var line = streamReader.ReadLine();
+      if (line != null)
+      {
+        templateBuilder
+          .Append(line)
+          .AppendLine();
+      }
+    }
+
+    return templateBuilder.ToString();
+  }
 }
