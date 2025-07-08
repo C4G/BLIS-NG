@@ -7,10 +7,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <PublishAot>true</PublishAot>
-    <TrimMode>link</TrimMode>
-    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
-    <TrimmerSingleWarn>true</TrimmerSingleWarn>
+    <PublishSingleFile>true</PublishSingleFile>
+
+    <!--Avalonia
+    doesn't support TrimMode=link currently, but we are working on that
+    https://github.com/AvaloniaUI/Avalonia/issues/6892 -->
+    <TrimMode>copyused</TrimMode>
+
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,21 +39,17 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.2" />
-    <PackageReference
-      Include="Avalonia.Desktop" Version="11.3.2" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.2" />
     <!--
       Condition
       below is needed to remove Avalonia.Diagnostics package from build output in Release
       configuration.
     -->
-    <PackageReference
-      Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics"
-      Version="11.3.2" />
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.2" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.2" />
-    <PackageReference
-      Include="Avalonia.Themes.Fluent" Version="11.3.2" />
-    <PackageReference Include="Fluid.Core"
-      Version="2.24.0" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.2" />
+    <PackageReference Include="Fluid.Core" Version="2.24.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.6" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.6" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.6" />

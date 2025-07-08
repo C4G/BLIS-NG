@@ -1,9 +1,8 @@
-namespace BLIS_NG.ViewModels
-{
-  public class MainWindowViewModel() : ViewModelBase
-  {
-    public static string WindowTitle { get => ServerControlViewModel.AppVersion; }
+namespace BLIS_NG.ViewModels;
 
-    public ServerControlViewModel ServerControlViewModel { get; } = new ServerControlViewModel();
-  }
+public class MainWindowViewModel(ServerControlViewModel serverControlViewModel) : ViewModelBase
+{
+  public static string WindowTitle { get => ServerControlViewModel.AppVersion; }
+
+  public ServerControlViewModel ServerControlViewModel { get; } = serverControlViewModel;
 }

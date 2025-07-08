@@ -1,5 +1,4 @@
 using System.Reactive;
-using BLIS_NG.Config;
 using BLIS_NG.server;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
@@ -26,9 +25,8 @@ public class ServerControlViewModel
 
   public string ServerLog { get; set; } = "";
 
-  public ServerControlViewModel()
+  public ServerControlViewModel(ILoggerFactory loggerFactory)
   {
-    var loggerFactory = AppConfig.CreateLoggerFactory();
     mySqlServer = new(loggerFactory);
     apache2Server = new(loggerFactory);
 
