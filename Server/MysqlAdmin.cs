@@ -28,6 +28,6 @@ public class MySqlAdmin(ILoggerFactory loggerFactory) : BaseProcess(nameof(MySql
 
   public async Task Shutdown()
   {
-    await Execute(MysqlAdminPath, $"{baseArguments} shutdown", (stdout) => logger.LogInformation("{Message}", stdout), (stderr) => logger.LogWarning("{Message}", stderr));
+    await Execute(MysqlAdminPath, $"{baseArguments} shutdown", null, (stdout) => logger.LogInformation("{Message}", stdout), (stderr) => logger.LogWarning("{Message}", stderr));
   }
 }

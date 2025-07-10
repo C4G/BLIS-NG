@@ -28,7 +28,7 @@ public abstract class BaseProcess(string ProcessName, ILoggerFactory loggerFacto
 
   public abstract Task<ProcessResult> Run(Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default);
 
-  internal async Task<ProcessResult> Execute(string exePath, string arguments, Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default)
+  internal async Task<ProcessResult> Execute(string exePath, string arguments, IDictionary<string, string>? environment = null, Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default)
   {
     var result = new ProcessResult(FAILED_TO_LAUNCH);
 
@@ -37,6 +37,8 @@ public abstract class BaseProcess(string ProcessName, ILoggerFactory loggerFacto
       logger.LogWarning("Attempted to start {ProcessName} when it is already running.", ProcessName);
       return result;
     }
+
+    logger.LogInformation("{ExePath} {Arguments}", exePath, arguments);
 
     process = new Process()
     {
@@ -54,6 +56,14 @@ public abstract class BaseProcess(string ProcessName, ILoggerFactory loggerFacto
         RedirectStandardInput = true,
       }
     };
+
+    if (environment != null)
+    {
+      foreach (var (key, value) in environment)
+      {
+        process.StartInfo.EnvironmentVariables[key] = value;
+      }
+    }
 
     var outputCloseEvent = new TaskCompletionSource<bool>();
     process.OutputDataReceived += (s, e) =>

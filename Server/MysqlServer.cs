@@ -25,7 +25,7 @@ public class MySqlServer(ILoggerFactory loggerFactory) : BaseProcess(nameof(MySq
   public override async Task<ProcessResult> Run(Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default)
   {
     mySqlIni.Write();
-    return await Execute(MysqldPath, Arguments, stdOutConsumer, stdErrConsumer, cancellationToken);
+    return await Execute(MysqldPath, Arguments, null, stdOutConsumer, stdErrConsumer, cancellationToken);
   }
 
   public override async void Stop()

@@ -9,18 +9,27 @@ public class Apache2Server(ILoggerFactory loggerFactory) : BaseProcess(nameof(Ap
   private static readonly string Apache2Path = Path.Combine(
     HttpdConf.APACHE2_BASE, "bin", "httpd.exe");
 
-  private static readonly string ConfigPath = Path.Combine(
-    ConfigurationFile.RUN_DIR, "httpd.conf"
-  );
-
-  private static readonly string Arguments = $"-f \"{ConfigPath}\" -e debug";
+  private static readonly string Arguments = $"-f \"{HttpdConf.CONFIG_FILE_PATH}\" -e info";
 
   private readonly HttpdConf httpdConf = new();
+  private readonly PhpIni phpIni = new();
 
   public override async Task<ProcessResult> Run(Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default)
   {
     httpdConf.Write();
-    return await Execute(Apache2Path, Arguments, stdOutConsumer, stdErrConsumer, cancellationToken);
+    phpIni.Write();
+
+    string path = Environment.GetEnvironmentVariable("PATH") ?? "";
+    string newpath = $"{path};{PhpIni.PHP_BASE}";
+
+    var env = new Dictionary<string, string>()
+    {
+      { "PATH", newpath },
+      { "PHPRC", PhpIni.PHP_BASE },
+      { "DB_PORT", MySqlIni.MYSQL_PORT.ToString() }
+    };
+
+    return await Execute(Apache2Path, Arguments, env, stdOutConsumer, stdErrConsumer, cancellationToken);
   }
 
   public override void Stop()

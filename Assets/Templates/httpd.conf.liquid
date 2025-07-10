@@ -252,7 +252,7 @@ DocumentRoot "{{ apache_docroot }}"
 # logged here.  If you *do* define an error logfile for a <VirtualHost>
 # container, that host's errors will be logged there and not here.
 #
-ErrorLog "{{ log_dir }}/error.log"
+ErrorLog "{{ log_dir }}/apache2_error.log"
 
 #
 # LogLevel: Control the number of messages logged to the error_log.
@@ -281,7 +281,7 @@ LogLevel warn
     # define per-<VirtualHost> access logfiles, transactions will be
     # logged therein and *not* in this file.
     #
-    CustomLog "{{ log_dir }}/access.log" common
+    CustomLog "{{ log_dir }}/apache2_access.log" common
 
     #
     # If you prefer a logfile with access, agent, and referer information

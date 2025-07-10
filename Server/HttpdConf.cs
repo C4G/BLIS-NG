@@ -8,17 +8,19 @@ public class HttpdConf : ConfigurationFile
 
   public static readonly string APACHE2_BASE =
     Path.Combine(SERVER_BASE_DIR, "Apache");
+  public static readonly string CONFIG_FILE_PATH =
+    Path.Combine(APACHE2_BASE, "conf", "httpd.conf");
   public static readonly string DOCROOT =
     Path.Combine(Directory.GetCurrentDirectory(), "htdocs");
   public static readonly string LOG_DIRECTORY =
-    Path.Combine(DOCROOT, "logs");
+    Path.Combine(Directory.GetCurrentDirectory(), "log");
 
   public HttpdConf() : base(new Uri("avares://BLIS-NG/Assets/Templates/httpd.conf.liquid"))
   { }
 
   public override void Write()
   {
-    GenerateConfiguration(Path.Combine(RUN_DIR, "httpd.conf"), new Dictionary<string, string> {
+    GenerateConfiguration(CONFIG_FILE_PATH, new Dictionary<string, string> {
       { "apache_ip", APACHE2_BIND_ADDRESS},
       { "apache_port", APACHE2_PORT.ToString() },
       { "apache_docroot", DOCROOT },
