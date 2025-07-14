@@ -1,5 +1,5 @@
 using System.Reactive;
-using BLIS_NG.server;
+using BLIS_NG.Config;
 using BLIS_NG.Server;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
@@ -18,22 +18,16 @@ public class ServerControlViewModel
   private readonly Apache2Server apache2Server;
   private Task? apacheServerTask;
 
-  private readonly Action<string> stdOutLogger;
-  private readonly Action<string> stdErrLogger;
-
   public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
   public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
 
   public string ServerLog { get; set; } = "";
 
-  public ServerControlViewModel(ILoggerFactory loggerFactory)
+  public ServerControlViewModel(ILogger<ServerControlViewModel> logger, MySqlServer mySqlServer, Apache2Server apache2Server)
   {
-    mySqlServer = new(loggerFactory);
-    apache2Server = new(loggerFactory);
-
-    logger = loggerFactory.CreateLogger<ServerControlViewModel>();
-    stdOutLogger = (m) => logger.LogInformation("{}", m);
-    stdErrLogger = (m) => logger.LogWarning("{}", m);
+    this.mySqlServer = mySqlServer;
+    this.apache2Server = apache2Server;
+    this.logger = logger;
 
     StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
     StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
@@ -45,12 +39,12 @@ public class ServerControlViewModel
 
     if (mysqlServerTask == null && !mySqlServer.IsRunning)
     {
-      mysqlServerTask = mySqlServer.Run(stdOutLogger, stdErrLogger);
+      mysqlServerTask = mySqlServer.Run();
     }
 
     if (apacheServerTask == null && !apache2Server.IsRunning)
     {
-      apacheServerTask = apache2Server.Run(stdOutLogger, stdErrLogger);
+      apacheServerTask = apache2Server.Run();
     }
   }
 

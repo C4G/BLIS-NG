@@ -1,4 +1,4 @@
-namespace BLIS_NG.Server;
+namespace BLIS_NG.Config;
 
 public class PhpIni : ConfigurationFile
 {

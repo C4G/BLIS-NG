@@ -1,6 +1,3 @@
-// The initial code for this class was adapted from
-// https://gist.github.com/AlexMAS/276eed492bc989e13dcce7c78b9e179d
-
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
@@ -11,24 +8,20 @@ public record ProcessResult(int ExitCode)
   public readonly int ExitCode = ExitCode;
 }
 
-public interface IExternalProcess : IDisposable
-{
-  public Task<ProcessResult> Run(Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default);
-  public void Stop();
-}
+// The initial code for this class was adapted from:
+// https://gist.github.com/AlexMAS/276eed492bc989e13dcce7c78b9e179d
 
-public abstract class BaseProcess(string ProcessName, ILoggerFactory loggerFactory) : IExternalProcess
+public abstract class BaseProcess(string ProcessName, ILogger logger)
 {
-  public const int FAILED_TO_LAUNCH = -1;
+  private const int FAILED_TO_LAUNCH = -1;
 
-  private readonly ILogger<BaseProcess> logger = loggerFactory.CreateLogger<BaseProcess>();
-  protected readonly string ProcessName = ProcessName;
+  private readonly ILogger logger = logger;
+  private readonly string ProcessName = ProcessName;
   private Process? process;
+
   public bool IsRunning { get => process != null; }
 
-  public abstract Task<ProcessResult> Run(Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default);
-
-  internal async Task<ProcessResult> Execute(string exePath, string arguments, IDictionary<string, string>? environment = null, Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default)
+  protected async Task<ProcessResult> Execute(string exePath, string arguments, IDictionary<string, string>? environment = null, Action<string>? stdOutConsumer = null, Action<string>? stdErrConsumer = null, CancellationToken cancellationToken = default)
   {
     var result = new ProcessResult(FAILED_TO_LAUNCH);
 
@@ -49,7 +42,7 @@ public abstract class BaseProcess(string ProcessName, ILoggerFactory loggerFacto
         Arguments = arguments,
 
         // Things we want set for all processes
-        WindowStyle = ProcessWindowStyle.Normal,
+        WindowStyle = ProcessWindowStyle.Hidden,
         UseShellExecute = false,
         RedirectStandardOutput = true,
         RedirectStandardError = true,
@@ -112,11 +105,13 @@ public abstract class BaseProcess(string ProcessName, ILoggerFactory loggerFacto
       await Task.WhenAll(exitWaiter, outputCloseEvent.Task, errorCloseEvent.Task);
 
       result = new ProcessResult(ExitCode: process.ExitCode);
-      process = null;
     }
+
+    process = null;
 
     return result;
   }
+
   public abstract void Stop();
 
   protected void Kill()

@@ -17,10 +17,11 @@ public partial class App : Application
 
   public override void OnFrameworkInitializationCompleted()
   {
-    var collection = new ServiceCollection();
-    collection.AddLogging(builder => builder.AddDebug());
-    collection.AddSingleton<ServerControlViewModel>();
-    collection.AddSingleton<MainWindowViewModel>();
+    var collection = new ServiceCollection()
+      .AddLogging(builder => builder
+        .AddDebug()
+      )
+      .AddDependencies();
 
     var services = collection.BuildServiceProvider();
 

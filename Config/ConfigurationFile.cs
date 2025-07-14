@@ -2,7 +2,7 @@ using System.Text;
 using Avalonia.Platform;
 using Fluid;
 
-namespace BLIS_NG.Server;
+namespace BLIS_NG.Config;
 
 public abstract class ConfigurationFile(Uri templatePath)
 {
