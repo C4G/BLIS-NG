@@ -21,3 +21,7 @@ To build a release build (ie. a single binary) you can run:
 ```powershell
 dotnet publish -r win-x64 -c Release
 ```
+
+## License
+
+This project is licensed under the GNU General Public License Version 3, unless otherwise noted.
