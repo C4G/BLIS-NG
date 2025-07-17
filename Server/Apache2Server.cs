@@ -30,7 +30,7 @@ public class Apache2Server(ILogger<Apache2Server> logger, HttpdConf httpdConf, P
       { "DB_PORT", MySqlIni.MYSQL_PORT.ToString() }
     };
 
-    return await Execute(Apache2Path, Arguments, env, (stdout) => logger.LogInformation("{}", stdout), (stderr) => logger.LogWarning("{}", stderr), cancellationToken);
+    return await Execute(Apache2Path, Arguments, env, (stdout) => logger.LogInformation("{StdOut}", stdout), (stderr) => logger.LogWarning("{StdErr}", stderr), cancellationToken);
   }
 
   public override void Stop()

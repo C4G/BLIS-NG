@@ -26,7 +26,7 @@ public class MySqlServer(ILogger<MySqlServer> logger, MySqlIni mySqlIni, MySqlAd
   public async Task<ProcessResult> Run(CancellationToken cancellationToken = default)
   {
     mySqlIni.Write();
-    return await Execute(MysqldPath, Arguments, null, (stdout) => logger.LogInformation("{}", stdout), (stderr) => logger.LogWarning("{}", stderr), cancellationToken);
+    return await Execute(MysqldPath, Arguments, null, (stdout) => logger.LogInformation("{StdOut}", stdout), (stderr) => logger.LogWarning("{StdErr}", stderr), cancellationToken);
   }
 
   public override async void Stop()
