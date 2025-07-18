@@ -9,6 +9,7 @@ public abstract class ConfigurationFile(Uri templatePath)
   public static readonly string SERVER_BASE_DIR = Path.Combine(Directory.GetCurrentDirectory(), "server");
   public static readonly string TMP_DIR = Path.Combine(Directory.GetCurrentDirectory(), "tmp");
   public static readonly string RUN_DIR = Path.Combine(Directory.GetCurrentDirectory(), "run");
+  public static readonly string LOG_DIR = Path.Combine(Directory.GetCurrentDirectory(), "log");
   public static readonly string SESSION_DIR = Path.Combine(RUN_DIR, "session");
 
   private readonly FluidParser parser = new();
@@ -40,6 +41,7 @@ public abstract class ConfigurationFile(Uri templatePath)
     Directory.CreateDirectory(RUN_DIR);
     Directory.CreateDirectory(TMP_DIR);
     Directory.CreateDirectory(SESSION_DIR);
+    Directory.CreateDirectory(LOG_DIR);
   }
 
   private string ReadTemplate(Uri path)

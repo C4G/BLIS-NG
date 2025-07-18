@@ -31,7 +31,8 @@ public abstract class BaseProcess(string ProcessName, ILogger logger)
       return result;
     }
 
-    logger.LogInformation("{ExePath} {Arguments}", exePath, arguments);
+    // If you really want to know...
+    // logger.LogInformation("{ExePath} {Arguments}", exePath, arguments);
 
     process = new Process()
     {

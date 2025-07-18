@@ -75,11 +75,12 @@
             Orientation="Horizontal"
             Spacing="15"
             Grid.Row="4"
-            Grid.Column="2"
-            Grid.ColumnSpan="3"
+            Grid.Column="0"
+            Grid.ColumnSpan="5"
         >
-            <Button Width="160" Command="{Binding StartServerCommand}">Start BLIS</Button>
-            <Button Width="160" Command="{Binding StopServerCommand}">Stop BLIS</Button>
+            <TextBlock Width="240" VerticalAlignment="Center" Text="{Binding Status}"></TextBlock>
+            <Button Width="160" Command="{Binding StartServerCommand}" IsEnabled="{Binding StartBlisEnabled}">Start BLIS</Button>
+            <Button Width="160" Command="{Binding StopServerCommand}" IsEnabled="{Binding StopBlisEnabled}">Stop BLIS</Button>
         </StackPanel>
     </Grid>
 </Window>

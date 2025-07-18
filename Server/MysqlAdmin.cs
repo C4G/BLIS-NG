@@ -22,9 +22,11 @@ public class MySqlAdmin(ILogger<MySqlAdmin> logger) : BaseProcess(nameof(MySqlAd
     return;
   }
 
-  public async Task Ping()
+  public async Task<bool> Ping()
   {
-    await Execute(MysqlAdminPath, $"{baseArguments} ping", null, (stdout) => logger.LogInformation("{Message}", stdout), (stderr) => logger.LogWarning("{Message}", stderr));
+    // Not logging stdout here since it will just fill up logs.
+    var result = await Execute(MysqlAdminPath, $"{baseArguments} ping", null, null, (stderr) => logger.LogWarning("{Message}", stderr));
+    return result.ExitCode == 0;
   }
 
   public async Task Shutdown()
