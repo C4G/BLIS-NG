@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read # access to check out code and install dependencies
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.x'
+        cache: true
+    - run: dotnet build BLIS-NG.sln
+
