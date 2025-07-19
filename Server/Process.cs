@@ -11,7 +11,7 @@ public record ProcessResult(int ExitCode)
 // The initial code for this class was adapted from:
 // https://gist.github.com/AlexMAS/276eed492bc989e13dcce7c78b9e179d
 
-public abstract class BaseProcess(string ProcessName, ILogger logger)
+public abstract class BaseProcess(string ProcessName, ILogger logger) : IDisposable
 {
   private const int FAILED_TO_LAUNCH = -1;
 

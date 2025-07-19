@@ -39,6 +39,6 @@ public class Apache2Server(ILogger<Apache2Server> logger, HttpdConf httpdConf, P
     // Force it closed here and remove the .pid file.
     Process.Start("taskkill", "/F /IM httpd.exe /T");
     Thread.Sleep(1000);
-    File.Delete(Path.Combine(ConfigurationFile.RUN_DIR, "httpd.pid"));
+    File.Delete(HttpdConf.PID_FILE);
   }
 }

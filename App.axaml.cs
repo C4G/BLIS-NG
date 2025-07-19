@@ -18,7 +18,7 @@ public partial class App : Application
 
   public override void OnFrameworkInitializationCompleted()
   {
-    ConfigurationFile.MakeRequiredDirectories();
+    MakeRequiredDirectories();
 
     Log.Logger = new LoggerConfiguration()
           .Enrich.FromLogContext()
@@ -43,5 +43,12 @@ public partial class App : Application
     }
 
     base.OnFrameworkInitializationCompleted();
+  }
+
+  private static void MakeRequiredDirectories()
+  {
+    Directory.CreateDirectory(PhpIni.PHP_SESSION_PATH);
+    Directory.CreateDirectory(ConfigurationFile.TMP_DIR);
+    Directory.CreateDirectory(ConfigurationFile.LOG_DIR);
   }
 }

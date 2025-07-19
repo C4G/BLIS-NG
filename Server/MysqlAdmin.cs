@@ -25,7 +25,7 @@ public class MySqlAdmin(ILogger<MySqlAdmin> logger) : BaseProcess(nameof(MySqlAd
   public async Task<bool> Ping()
   {
     // Not logging stdout here since it will just fill up logs.
-    var result = await Execute(MysqlAdminPath, $"{baseArguments} ping", null, null, (stderr) => logger.LogWarning("{Message}", stderr));
+    var result = await Execute(MysqlAdminPath, $"{baseArguments} ping", null, null, null);
     return result.ExitCode == 0;
   }
 

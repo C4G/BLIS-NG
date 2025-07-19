@@ -14,6 +14,8 @@ public class HttpdConf : ConfigurationFile
     Path.Combine(Directory.GetCurrentDirectory(), "htdocs");
   public static readonly string LOG_DIRECTORY =
     Path.Combine(Directory.GetCurrentDirectory(), "log");
+  public static readonly string PID_FILE =
+    Path.Combine(TMP_DIR, "httpd.pid");
 
   public HttpdConf() : base(new Uri("avares://BLIS-NG/Assets/Templates/httpd.conf.liquid"))
   { }
@@ -27,7 +29,7 @@ public class HttpdConf : ConfigurationFile
       { "apache_base", APACHE2_BASE },
       { "log_dir", LOG_DIRECTORY },
       { "server_dir", SERVER_BASE_DIR },
-      { "run_dir", RUN_DIR },
+      { "pid_file", PID_FILE }
     });
   }
 }

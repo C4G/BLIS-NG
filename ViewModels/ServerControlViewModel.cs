@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Reactive;
 using BLIS_NG.Config;
+using BLIS_NG.Lib;
 using BLIS_NG.Server;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
@@ -13,13 +15,13 @@ public class ServerControlViewModel : ViewModelBase
 
   private readonly ILogger<ServerControlViewModel> logger;
 
-  private readonly MySqlAdmin mySqlAdmin;
   private readonly MySqlServer mySqlServer;
   private Task? mysqlServerTask;
 
   private readonly Apache2Server apache2Server;
   private Task? apacheServerTask;
 
+  private readonly HealthcheckService healthcheckService;
   private CancellationTokenSource healthcheckCanceler = new();
   private Task? healthcheck;
 
@@ -47,12 +49,12 @@ public class ServerControlViewModel : ViewModelBase
     set => this.RaiseAndSetIfChanged(ref _stopBlisEnabled, value);
   }
 
-  public ServerControlViewModel(ILogger<ServerControlViewModel> logger, MySqlServer mySqlServer, MySqlAdmin mySqlAdmin, Apache2Server apache2Server)
+  public ServerControlViewModel(ILogger<ServerControlViewModel> logger, MySqlServer mySqlServer, Apache2Server apache2Server, HealthcheckService healthcheckService)
   {
     this.mySqlServer = mySqlServer;
-    this.mySqlAdmin = mySqlAdmin;
     this.apache2Server = apache2Server;
     this.logger = logger;
+    this.healthcheckService = healthcheckService;
 
     StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
     StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
@@ -81,6 +83,9 @@ public class ServerControlViewModel : ViewModelBase
 
     StartBlisEnabled = false;
     StopBlisEnabled = true;
+
+    Thread.Sleep(1000);
+    OpenUrl(new Uri($"http://127.0.0.1:{HttpdConf.APACHE2_PORT}/"));
   }
 
   public async void HandleStopButtonClick()
@@ -117,14 +122,32 @@ public class ServerControlViewModel : ViewModelBase
 
   private async Task HealthcheckAndUpdateStatus()
   {
-    var mysqlUp = await mySqlAdmin.Ping();
-    if (mysqlUp)
+    var mysqlUp = await healthcheckService.MySqlHealthy();
+    var apache2up = await healthcheckService.Apache2Healthy();
+
+    if (mysqlUp && apache2up)
     {
       Status = "Status: Healthy";
+    }
+    else if (mysqlUp && !apache2up)
+    {
+      Status = "Status: Apache2 health check failed.";
     }
     else
     {
       Status = "Status: Stopped";
+    }
+  }
+
+  private void OpenUrl(Uri url)
+  {
+    try
+    {
+      Process.Start(new ProcessStartInfo { FileName = url.ToString(), UseShellExecute = true });
+    }
+    catch(Exception e)
+    {
+      logger.LogError(e, "Could not open URL in browser: {Url}", url);
     }
   }
 }

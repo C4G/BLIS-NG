@@ -8,6 +8,7 @@
 		x:DataType="vm:MainWindowViewModel"
         x:Class="BLIS_NG.Views.MainWindow"
         Title="{Binding WindowTitle}"
+        WindowState="{Binding WindowState}"
         Padding="10"
         Height="360"
         Width="640"

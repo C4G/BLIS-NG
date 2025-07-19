@@ -52,13 +52,13 @@ ServerRoot "{{ server_dir }}/Apache"
 
 # This was originally explicitly specified in the Server2Go config template
 # Leaving it commented out/anonymous here so Apache can manage it itself
-# ScoreBoardFile "{{ run_dir }}/apache_runtime_status"
+# ScoreBoardFile "{{ server_dir }}/apache_runtime_status"
 
 #
 # PidFile: The file in which the server should record its process
 # identification number when it starts.
 #
-PidFile "{{ run_dir }}/httpd.pid"
+PidFile "{{ pid_file }}"
 
 #
 # Listen: Allows you to bind Apache to specific IP addresses and/or
