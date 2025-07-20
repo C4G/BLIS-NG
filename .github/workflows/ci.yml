@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 permissions:
-  contents: read # access to check out code and install dependencies
+  contents: read
 
 jobs:
   build:
@@ -16,5 +16,8 @@ jobs:
       with:
         dotnet-version: '9.x'
         cache: true
-    - run: dotnet build BLIS-NG.sln
-
+    - run: dotnet publish -r win-x64 -c Release
+    - uses: actions/upload-artifact@v4
+      with:
+        name: blis-ng-exe
+        path: bin/Release/net9.0/win-x64/publish/BLIS-NG.exe
