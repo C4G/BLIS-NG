@@ -16,9 +16,15 @@ public class MainWindowViewModel : ViewModelBase
 
     // Start BLIS on app start
     ServerControlViewModel.HandleStartButtonClick();
-
-    Thread.Sleep(3000);
-
     WindowState = WindowState.Minimized;
+  }
+
+  public void Shutdown()
+  {
+    // Run method synchronously and wait for result.
+    var awaiter = Task.Run(ServerControlViewModel.HandleStopButtonClick).GetAwaiter();
+    // Wait a little while for things to shutdown cleanly
+    Thread.Sleep(5000);
+    awaiter.GetResult();
   }
 }

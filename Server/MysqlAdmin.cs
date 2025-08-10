@@ -7,10 +7,10 @@ namespace BLIS_NG.Server;
 /// Process wrapper class for running mysqladmin.exe.
 /// Does not run like other processes since it will not continually operate.
 /// </summary>
-public class MySqlAdmin(ILogger<MySqlAdmin> logger) : BaseProcess(nameof(MySqlAdmin), logger)
+public class MySqlAdmin(ILogger<MySqlAdmin> logger) : BaseProcess(nameof(MySqlAdmin), logger, singleton: false)
 {
   private static readonly string MysqlAdminPath = Path.Combine(
-    ConfigurationFile.SERVER_BASE_DIR, "mysql", "bin", "mysqladmin.exe"
+    ConfigurationFile.SERVER_BASE_DIR, "mysql", "bin", "mysqladmin.exe"  
   );
 
   private readonly ILogger<MySqlAdmin> logger = logger;

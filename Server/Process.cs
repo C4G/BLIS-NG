@@ -11,12 +11,13 @@ public record ProcessResult(int ExitCode)
 // The initial code for this class was adapted from:
 // https://gist.github.com/AlexMAS/276eed492bc989e13dcce7c78b9e179d
 
-public abstract class BaseProcess(string ProcessName, ILogger logger) : IDisposable
+public abstract class BaseProcess(string ProcessName, ILogger logger, bool singleton = true) : IDisposable
 {
   private const int FAILED_TO_LAUNCH = -1;
 
   private readonly ILogger logger = logger;
   private readonly string ProcessName = ProcessName;
+  private readonly bool singleton = singleton;
   private Process? process;
 
   public bool IsRunning { get => process != null; }
@@ -25,7 +26,7 @@ public abstract class BaseProcess(string ProcessName, ILogger logger) : IDisposa
   {
     var result = new ProcessResult(FAILED_TO_LAUNCH);
 
-    if (IsRunning)
+    if (singleton && IsRunning)
     {
       logger.LogWarning("Attempted to start {ProcessName} when it is already running.", ProcessName);
       return result;
@@ -105,7 +106,7 @@ public abstract class BaseProcess(string ProcessName, ILogger logger) : IDisposa
       var exitWaiter = Task.Run(process.WaitForExit, cancellationToken);
       await Task.WhenAll(exitWaiter, outputCloseEvent.Task, errorCloseEvent.Task);
 
-      result = new ProcessResult(ExitCode: process.ExitCode);
+      result = new ProcessResult(ExitCode: process?.ExitCode != null ? process.ExitCode : 1);
     }
 
     process = null;

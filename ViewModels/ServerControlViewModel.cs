@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Reactive;
+using Avalonia.Controls.ApplicationLifetimes;
 using BLIS_NG.Config;
 using BLIS_NG.Lib;
 using BLIS_NG.Server;
@@ -145,10 +146,16 @@ public class ServerControlViewModel : ViewModelBase
     {
       Process.Start(new ProcessStartInfo { FileName = url.ToString(), UseShellExecute = true });
     }
-    catch(Exception e)
+    catch (Exception e)
     {
       logger.LogError(e, "Could not open URL in browser: {Url}", url);
     }
+  }
+  
+  public void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
+  {
+    // Shutdown server when closing
+    HandleStopButtonClick();
   }
 }
 
