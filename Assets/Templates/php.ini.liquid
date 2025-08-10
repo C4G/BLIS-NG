@@ -127,7 +127,8 @@ implicit_flush = Off
 ; with future versions of the language (you will receive a warning each time
 ; you use this feature, and the argument will be passed by value instead of by
 ; reference).
-allow_call_time_pass_reference = On
+;; TODO: Make sure functions work, I guess...
+; allow_call_time_pass_reference = On
 
 ; Safe Mode
 ;
@@ -307,7 +308,7 @@ variables_order = "EGPCS"
 ; You should do your best to write your scripts so that they do not require
 ; register_globals to be on;  Using form variables as globals can easily lead
 ; to possible security problems, if the code is not very well thought of.
-register_globals = On
+; register_globals = On
 
 ; This directive tells PHP whether to declare the argv&argc variables (that
 ; would contain the GET information).  If you don't use these variables, you
@@ -324,7 +325,7 @@ gpc_order = "GPC"
 ;
 
 ; Magic quotes for incoming GET/POST/Cookie data.
-magic_quotes_gpc = On
+; magic_quotes_gpc = On
 
 ; Magic quotes for runtime-generated data, e.g. data from SQL, from exec(), etc.
 magic_quotes_runtime = Off
@@ -473,7 +474,7 @@ extension=php_mbstring.dll
 ;extension=php_oci8.dll
 extension=php_openssl.dll
 ;extension=php_oracle.dll
-extension=php_pdflib.dll
+;extension=php_pdflib.dll
 ;extension=php_pgsql.dll
 ;extension=php_printer.dll
 ;extension=php_shmop.dll
@@ -488,11 +489,12 @@ extension=php_pdflib.dll
 ;extension=php_pdo.dll
 ;extension=php_sqlite.dll
 ;extension=php_mysql_libmysql.dll
-extension=php_mysqli_libmysql.dll
+;extension=php_mysqli_libmysql.dll
+extension=php_mysqli.dll
 ;extension=php_pdo_sqlite.dll
 ;extension=php_pdo_pgsql.dll
 ;extension=php_pdo_mysql.dll
-extension=ixed.5.3ts.win
+;extension=ixed.5.3ts.win
 
 
 ;;;;;;;;;;;;;;;;;;;
