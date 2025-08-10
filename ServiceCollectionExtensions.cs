@@ -18,6 +18,7 @@ public static class ServiceCollectionExtensions
 
       // Server & utility processes
       .AddSingleton<MySqlAdmin>()
+      .AddSingleton<MySqlUpgrade>()
       .AddSingleton<MySqlServer>()
       .AddSingleton<Apache2Server>()
       .AddSingleton<HealthcheckService>()
