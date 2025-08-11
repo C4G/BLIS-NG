@@ -57,6 +57,7 @@
     <PackageReference Include="Fluid.Core" Version="2.25.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.7" />
+  <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="9.0.8" />
     <PackageRefernece Include="Serilog" Version="4.3.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
