@@ -91,11 +91,9 @@ LoadModule auth_basic_module modules/mod_auth_basic.so
 #LoadModule authn_anon_module modules/mod_authn_anon.so
 LoadModule authn_core_module modules/mod_authn_core.so
 #LoadModule authn_dbm_module modules/mod_authn_dbm.so
-#LoadModule authn_default_module modules/mod_authn_default.so
 LoadModule authn_file_module modules/mod_authn_file.so
 LoadModule authz_core_module modules/mod_authz_core.so
 #LoadModule authz_dbm_module modules/mod_authz_dbm.so
-#LoadModule authz_default_module modules/mod_authz_default.so
 LoadModule authz_groupfile_module modules/mod_authz_groupfile.so
 LoadModule authz_host_module modules/mod_authz_host.so
 LoadModule authz_user_module modules/mod_authz_user.so
@@ -375,17 +373,6 @@ LogLevel warn
 # .htaccess file, with either the 'registry' (Windows behavior) or 'script' 
 # (Unix behavior) option, and will override this server default option.
 #
-
-#
-# DefaultType: the default MIME type the server will use for a document
-# if it cannot otherwise determine one, such as from filename extensions.
-# If your server contains mostly text or HTML documents, "text/plain" is
-# a good value.  If most of your content is binary, such as applications
-# or images, you may want to use "application/octet-stream" instead to
-# keep browsers from trying to display binary files as though they are
-# text.
-#
-# DefaultType text/plain
 
 <IfModule mime_module>
     #
