@@ -1,10 +1,9 @@
 using BLIS_NG.Config;
-using BLIS_NG.Lib;
 using BLIS_NG.Server;
 using BLIS_NG.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BLIS_NG;
+namespace BLIS_NG.Lib;
 
 public static class ServiceCollectionExtensions
 {
@@ -22,6 +21,9 @@ public static class ServiceCollectionExtensions
       .AddSingleton<MySqlServer>()
       .AddSingleton<Apache2Server>()
       .AddSingleton<HealthcheckService>()
+
+      // Main server entrypoint
+      .AddSingleton<IMainServer, MainServer>()
 
       // ViewModels
       .AddSingleton<ServerControlViewModel>()

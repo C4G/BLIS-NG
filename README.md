@@ -6,7 +6,14 @@ This application replaces the customized [Server2Go](https://web.archive.org/web
 
 The binary built with this project will require the files in [BLISRuntime](https://github.com/C4G/BLISRuntime) and [BLIS](https://github.com/C4G/BLIS) to run.
 
+## Compatibility
+
+**This project requires Microsoft Windows (x86-64) to run.**
+
+Additional ports to other operating systems or architectures are certainly _possible_ but are not currently in scope.
+
 ## Building
+
 
 To build this project, ensure you have the latest .NET Core SDK installed, and run:
 

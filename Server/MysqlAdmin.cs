@@ -9,7 +9,7 @@ namespace BLIS_NG.Server;
 /// </summary>
 public class MySqlAdmin(ILogger<MySqlAdmin> logger) : BaseProcess(nameof(MySqlAdmin), logger, singleton: false)
 {
-  private static readonly string MysqlAdminPath = Path.Combine(
+  public static readonly string MysqlAdminPath = Path.Combine(
     ConfigurationFile.SERVER_BASE_DIR, "mysql", "bin", "mysqladmin.exe"  
   );
 

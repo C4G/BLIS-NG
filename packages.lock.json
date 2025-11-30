@@ -68,6 +68,16 @@
           "TimeZoneConverter": "7.2.0"
         }
       },
+      "MessageBox.Avalonia": {
+        "type": "Direct",
+        "requested": "[3.3.0, )",
+        "resolved": "3.3.0",
+        "contentHash": "4btMa3Q5S/gZxqfi18tZYixnP9vy0KK/WyXYegQU+2/bfl5OFU56oS2bS7g5xNabXfRysl7Z7qoY/2ELLl4k5A==",
+        "dependencies": {
+          "Avalonia": "11.1.5",
+          "DialogHost.Avalonia": "0.8.1"
+        }
+      },
       "Microsoft.Extensions.DependencyInjection": {
         "type": "Direct",
         "requested": "[9.0.8, )",
@@ -202,6 +212,14 @@
           "Avalonia": "11.3.8",
           "Avalonia.FreeDesktop": "11.3.8",
           "Avalonia.Skia": "11.3.8"
+        }
+      },
+      "DialogHost.Avalonia": {
+        "type": "Transitive",
+        "resolved": "0.8.1",
+        "contentHash": "RLBOMqjJPgSmwe0i1pzX3Q7Pn0i4xE/E1b774krd4VyEkaorz1AYMdYQHyIfuhtQv5NntZyS0MuQbxJl/PhzBg==",
+        "dependencies": {
+          "Avalonia": "11.1.0"
         }
       },
       "DynamicData": {

@@ -34,11 +34,11 @@ public abstract class ConfigurationFile(Uri templatePath)
 
   public abstract void Write();
 
-  private string ReadTemplate(Uri path)
+  private static string ReadTemplate(Uri path)
   {
     var templateBuilder = new StringBuilder();
 
-    using var stream = AssetLoader.Open(templatePath);
+    using var stream = AssetLoader.Open(path);
     using var streamReader = new StreamReader(stream);
     while (!streamReader.EndOfStream)
     {

@@ -6,7 +6,7 @@ namespace BLIS_NG.Server;
 
 public class Apache2Server(ILogger<Apache2Server> logger, HttpdConf httpdConf, PhpIni phpIni) : BaseProcess(nameof(Apache2Server), logger)
 {
-  private static readonly string Apache2Path = Path.Combine(
+  public static readonly string Apache2Path = Path.Combine(
     HttpdConf.APACHE2_BASE, "bin", "httpd.exe");
 
   private static readonly string Arguments = $"-f \"{HttpdConf.CONFIG_FILE_PATH}\" -e info";

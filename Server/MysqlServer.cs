@@ -5,7 +5,7 @@ namespace BLIS_NG.Server;
 
 public class MySqlServer(ILogger<MySqlServer> logger, MySqlIni mySqlIni, MySqlAdmin mySqlAdmin, MySqlUpgrade mySqlUpgrade) : BaseProcess(nameof(MySqlServer), logger)
 {
-  private static readonly string MysqldPath = Path.Combine(
+  public static readonly string MysqldPath = Path.Combine(
     ConfigurationFile.SERVER_BASE_DIR, "mysql", "bin", "mysqld.exe");
 
   private static readonly string DataDir = Path.Combine(

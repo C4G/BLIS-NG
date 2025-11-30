@@ -1,30 +1,39 @@
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 
 namespace BLIS_NG.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-  public static string WindowTitle { get => ServerControlViewModel.AppVersion; }
+    public static string WindowTitle { get => ServerControlViewModel.AppVersion; }
 
-  public static WindowState WindowState { get; set; }
+    public static WindowState WindowState { get; set; }
 
-  public ServerControlViewModel ServerControlViewModel { get; init; }
+    public ServerControlViewModel ServerControlViewModel { get; init; }
 
-  public MainWindowViewModel(ServerControlViewModel serverControlViewModel)
-  {
-    ServerControlViewModel = serverControlViewModel;
+    private IApplicationLifetime? ApplicationLifetime { get; init; }
 
-    // Start BLIS on app start
-    ServerControlViewModel.HandleStartButtonClick();
-    WindowState = WindowState.Minimized;
-  }
+    public MainWindowViewModel(IApplicationLifetime? lifetime, ServerControlViewModel serverControlViewModel)
+    {
+        ApplicationLifetime = lifetime;
+        ServerControlViewModel = serverControlViewModel;
 
-  public void Shutdown()
-  {
-    // Run method synchronously and wait for result.
-    var awaiter = Task.Run(ServerControlViewModel.HandleStopButtonClick).GetAwaiter();
-    // Wait a little while for things to shutdown cleanly
-    Thread.Sleep(5000);
-    awaiter.GetResult();
-  }
+        // Start BLIS on app start
+        ServerControlViewModel.HandleStartButtonClick();
+        WindowState = WindowState.Minimized;
+    }
+
+    public bool Shutdown()
+    {
+        ServerControlViewModel.HandleStopButtonClick();
+        return !ServerControlViewModel.ProbablyRunning;
+    }
+
+    public void TryShutdown()
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
+        {
+            lifetime.TryShutdown();
+        }
+    }
 }

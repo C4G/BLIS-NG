@@ -5,19 +5,31 @@ namespace BLIS_NG.Views;
 
 public partial class MainWindow : Window
 {
-  public MainWindow()
-  {
-    InitializeComponent();
-  }
+    private bool UserRequestedClose = false;
 
-  protected override void OnClosing(WindowClosingEventArgs e)
-  {
-    if (DataContext is MainWindowViewModel vm)
+    public MainWindow()
     {
-      vm.Shutdown();
+        InitializeComponent();
     }
 
-    base.OnClosing(e);
-  }
+    protected override async void OnClosing(WindowClosingEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm)
+        {
+            var shutdownSuccess = vm.Shutdown();
+            e.Cancel = !shutdownSuccess;
+            if (!UserRequestedClose && !shutdownSuccess)
+            {
+                UserRequestedClose = true;
+                await Task.Run(async () =>
+                {
+                    await Task.Delay(5000);
+                    vm.TryShutdown();
+                });
+            }
+        }
+
+        base.OnClosing(e);
+    }
 }
 
