@@ -19,18 +19,16 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        EnvironmentChecker.CreateRequiredDirectories();
-
         Log.Logger = new LoggerConfiguration()
-              .Enrich.FromLogContext()
-              .WriteTo.Debug()
-              .WriteTo.File(Path.Combine(ConfigurationFile.LOG_DIR, "blis_ng_.log"), rollingInterval: RollingInterval.Day)
-              .CreateLogger();
+            .Enrich.FromLogContext()
+            .WriteTo.Debug()
+            .WriteTo.File(Path.Combine(ConfigurationFile.ResolveBaseDirectory(), "log", "blis_ng_.log"), rollingInterval: RollingInterval.Day)
+            .CreateLogger();
 
         var collection = new ServiceCollection()
-          .AddLogging(builder => builder.AddSerilog(dispose: true))
-          // See Lib/ServiceCollectionExtensions.cs to see the dependency injection entrypoint.
-          .AddDependencies();
+            .AddLogging(builder => builder.AddSerilog(dispose: true))
+            // See Lib/ServiceCollectionExtensions.cs to see the dependency injection entrypoint.
+            .AddDependencies();
 
         if (ApplicationLifetime != null)
         {
