@@ -8,9 +8,12 @@
       "request": "launch",
       "name": "Launch",
       "type": "coreclr",
-      "cwd": "${workspaceFolder}/test/",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/bin/Debug/net9.0/BLIS-NG.dll",
+      "program": "${workspaceFolder}/bin/Debug/net10.0/BLIS-NG.dll",
+      "args": [
+        "--WorkingDirectory",
+        "${workspaceFolder}/../BLIS/"
+      ]
     }
   ]
 }

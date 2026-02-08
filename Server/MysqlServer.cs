@@ -3,83 +3,91 @@ using Microsoft.Extensions.Logging;
 
 namespace BLIS_NG.Server;
 
-public class MySqlServer(ILogger<MySqlServer> logger, MySqlIni mySqlIni, MySqlAdmin mySqlAdmin, MySqlUpgrade mySqlUpgrade) : BaseProcess(nameof(MySqlServer), logger)
+public class MySqlServer : BaseProcess
 {
-  public static readonly string MysqldPath = Path.Combine(
-    ConfigurationFile.SERVER_BASE_DIR, "mysql", "bin", "mysqld.exe");
+    public readonly string MysqldPath;
+    private readonly string DataDir;
+    private readonly string Arguments;
 
-  private static readonly string DataDir = Path.Combine(
-    Directory.GetCurrentDirectory(),
-    "dbdir"
-  );
+    private readonly ILogger<MySqlServer> logger;
+    private readonly MySqlIni mySqlIni;
+    private readonly MySqlAdmin mySqlAdmin;
+    private readonly MySqlUpgrade mySqlUpgrade;
 
-  private static readonly string Arguments = $"--defaults-file=\"{MySqlIni.CONFIG_FILE_PATH}\" --console --datadir=\"{DataDir}\"";
-
-  private readonly ILogger<MySqlServer> logger = logger;
-  private readonly MySqlIni mySqlIni = mySqlIni;
-  private readonly MySqlAdmin mySqlAdmin = mySqlAdmin;
-  private readonly MySqlUpgrade mySqlUpgrade = mySqlUpgrade;
-
-  public async Task<ProcessResult> Run(CancellationToken cancellationToken = default)
-  {
-    mySqlIni.Write();
-
-    if (UpgradeRequired())
+    public MySqlServer(ILogger<MySqlServer> logger, MySqlIni mySqlIni, MySqlAdmin mySqlAdmin, MySqlUpgrade mySqlUpgrade) : base(nameof(MySqlServer), logger)
     {
-      var result = await PerformUpgrade(cancellationToken);
-      if (!result)
-      {
-        logger.LogError("MySQL upgrade is required but it could not be completed. Check the logs for details.");
-        return new ProcessResult(-1);
-      }
+        this.logger = logger;
+        this.mySqlIni = mySqlIni;
+        this.mySqlAdmin = mySqlAdmin;
+        this.mySqlUpgrade = mySqlUpgrade;
+
+        MysqldPath = Path.Combine(mySqlIni.SERVER_BASE_DIR, "mysql", "bin", "mysqld.exe");
+        DataDir = Path.Combine(mySqlIni.BASE_DIR, "dbdir");
+
+        Arguments = $"--defaults-file=\"{mySqlIni.CONFIG_FILE_PATH}\" --console --datadir=\"{DataDir}\"";
+
     }
 
-    return await Execute(MysqldPath, Arguments, null, (stdout) => logger.LogInformation("{StdOut}", stdout), (stderr) => logger.LogWarning("{StdErr}", stderr), cancellationToken);
-  }
-
-  public override async void Stop()
-  {
-    await mySqlAdmin.Shutdown();
-  }
-
-  private bool UpgradeRequired()
-  {
-    if (!File.Exists(Path.Combine(DataDir, "mysql", "plugin.frm")))
+    public async Task<ProcessResult> Run(CancellationToken cancellationToken = default)
     {
-      logger.LogWarning("mysql/plugin.frm (mysql.plugin table) does not exist. Attempting to upgrade MySQL database.");
-      return true;
+        mySqlIni.Write();
+
+        if (UpgradeRequired())
+        {
+            var result = await PerformUpgrade(cancellationToken);
+            if (!result)
+            {
+                logger.LogError("MySQL upgrade is required but it could not be completed. Check the logs for details.");
+                return new ProcessResult(-1);
+            }
+        }
+
+        return await Execute(MysqldPath, Arguments, null, (stdout) => logger.LogInformation("{StdOut}", stdout), (stderr) => logger.LogWarning("{StdErr}", stderr), cancellationToken);
     }
 
-    return false;
-  }
-
-  private async Task<bool> PerformUpgrade(CancellationToken cancellationToken)
-  {
-    // Start MySQL server with the --skip-grant-tables option to disable password authentication to enable upgrading
-    var args = $"{Arguments} --skip-grant-tables";
-    var serverTask = Execute(MysqldPath, args, null, (stdout) => logger.LogInformation("{StdOut}", stdout), (stderr) => logger.LogWarning("{StdErr}", stderr), cancellationToken);
-
-    bool awake = false;
-    for (int i = 0; !awake && i < 15; i++)
+    public override async void Stop()
     {
-      // Give the server a second to wake up...
-      Thread.Sleep(1000);
-
-      awake = await mySqlAdmin.Ping();
-      if (awake) break;
+        await mySqlAdmin.Shutdown();
     }
 
-    if (!awake)
+    private bool UpgradeRequired()
     {
-      logger.LogError("Could not start MySQL for upgrading.");
-      return false;
+        if (!File.Exists(Path.Combine(DataDir, "mysql", "plugin.frm")))
+        {
+            logger.LogWarning("mysql/plugin.frm (mysql.plugin table) does not exist. Attempting to upgrade MySQL database.");
+            return true;
+        }
+
+        return false;
     }
 
-    await mySqlUpgrade.Run();
+    private async Task<bool> PerformUpgrade(CancellationToken cancellationToken)
+    {
+        // Start MySQL server with the --skip-grant-tables option to disable password authentication to enable upgrading
+        var args = $"{Arguments} --skip-grant-tables";
+        var serverTask = Execute(MysqldPath, args, null, (stdout) => logger.LogInformation("{StdOut}", stdout), (stderr) => logger.LogWarning("{StdErr}", stderr), cancellationToken);
 
-    await mySqlAdmin.Shutdown();
-    await serverTask;
+        bool awake = false;
+        for (int i = 0; !awake && i < 15; i++)
+        {
+            // Give the server a second to wake up...
+            Thread.Sleep(1000);
 
-    return true;
-  }
+            awake = await mySqlAdmin.Ping();
+            if (awake) break;
+        }
+
+        if (!awake)
+        {
+            logger.LogError("Could not start MySQL for upgrading.");
+            return false;
+        }
+
+        await mySqlUpgrade.Run();
+
+        await mySqlAdmin.Shutdown();
+        await serverTask;
+
+        return true;
+    }
 }
