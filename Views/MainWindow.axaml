@@ -24,7 +24,7 @@
 	<Grid 
         DataContext="{Binding ServerControlViewModel}" 
         ColumnDefinitions="*,*,*,*,*"
-        RowDefinitions="*,*,*,*,*"
+        RowDefinitions="*,*,*,*,auto,*"
     >
 		<TextBlock 
             TextAlignment="Left" 
@@ -61,6 +61,7 @@
             C4G at Georgia Tech, the CDC, and participating countries.
         </TextBlock>
 
+        
         <TextBlock
             FontSize="12"
             FontFamily="Times New Roman"
@@ -72,16 +73,28 @@
             C4G BLIS has been licensed under the GNU General Public License version 3. For more information, visit blis.cc.gatech.edu.
         </TextBlock>
 
+        <Button 
+            Width="160"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Grid.Row="4"
+            Grid.Column="3"
+            Grid.ColumnSpan="2"
+            Command="{Binding OpenPasswordResetCommand}">
+            Reset Password
+        </Button>
+
+
         <StackPanel
             Orientation="Horizontal"
             Spacing="15"
-            Grid.Row="4"
+            Grid.Row="5"
             Grid.Column="0"
             Grid.ColumnSpan="5"
         >
             <TextBlock Width="240" VerticalAlignment="Center" Text="{Binding Status}"></TextBlock>
             <Button Width="160" Command="{Binding StartServerCommand}" IsEnabled="{Binding StartBlisEnabled}">Start BLIS</Button>
             <Button Width="160" Command="{Binding StopServerCommand}" IsEnabled="{Binding StopBlisEnabled}">Stop BLIS</Button>
-        </StackPanel>
+    </StackPanel>
     </Grid>
 </Window>

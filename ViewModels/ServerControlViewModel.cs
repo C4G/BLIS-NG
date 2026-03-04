@@ -15,8 +15,12 @@ public class ServerControlViewModel : ViewModelBase
     private readonly ILogger<ServerControlViewModel> logger;
     private readonly IMainServer mainServer;
 
+    private readonly IClassicDesktopStyleApplicationLifetime _lifetime;
+
     public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
     public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> OpenPasswordResetCommand { get; }
 
     private string _status = string.Empty;
     public string Status
@@ -41,13 +45,15 @@ public class ServerControlViewModel : ViewModelBase
 
     public bool ProbablyRunning { get; private set; }
 
-    public ServerControlViewModel(ILogger<ServerControlViewModel> logger, IMainServer mainServer)
+    public ServerControlViewModel(ILogger<ServerControlViewModel> logger, IMainServer mainServer, IClassicDesktopStyleApplicationLifetime lifetime)
     {
         this.logger = logger;
         this.mainServer = mainServer;
+        _lifetime = lifetime;
 
         StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
         StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
+        OpenPasswordResetCommand = ReactiveCommand.Create(HandleOpenPasswordReset);
     }
 
     public void HandleStartButtonClick()
@@ -63,7 +69,8 @@ public class ServerControlViewModel : ViewModelBase
 
     public async void HandleStopButtonClick()
     {
-        if (StopBlisEnabled) {
+        if (StopBlisEnabled)
+        {
             await mainServer.Stop();
         }
     }
@@ -90,7 +97,7 @@ public class ServerControlViewModel : ViewModelBase
             StartBlisEnabled = true;
             StopBlisEnabled = false;
             ProbablyRunning = true;
-        } 
+        }
         else if (serverStatus.Apache2 == MainServer.State.Stopping || serverStatus.MySql == MainServer.State.Stopping)
         {
             Status = "Status: Stopping";
@@ -123,6 +130,12 @@ public class ServerControlViewModel : ViewModelBase
     {
         // Shutdown server when closing
         HandleStopButtonClick();
+    }
+    private void HandleOpenPasswordReset()
+    {
+        if (_lifetime.MainWindow is null) return;
+        var dialog = new BLIS_NG.Views.PasswordResetDialog();
+        dialog.ShowDialog(_lifetime.MainWindow);
     }
 }
 
