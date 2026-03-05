@@ -2,8 +2,8 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:  
+    branches: [ main, s2026-prototype-passwordreset ]
+  
 permissions:
   contents: read
 
