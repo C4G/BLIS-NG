@@ -72,12 +72,14 @@ public class PasswordResetViewModel : ViewModelBase
 
     private static string HashPasswordSha1(string password)
     {
-        var bytes = SHA1.HashData(Encoding.UTF8.GetBytes(password));
+        var salted = password + "This comment should suffice as salt.";
+        var bytes = SHA1.HashData(Encoding.UTF8.GetBytes(salted));
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
     private async Task HandleResetAsync()
     {
+
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
 
@@ -98,6 +100,7 @@ public class PasswordResetViewModel : ViewModelBase
         }
 
         var sha1Hash = HashPasswordSha1(NewPassword);
+
         var success = await _mySqlAdmin.ResetUserPassword(Username, sha1Hash);
 
         if (success)

@@ -43,14 +43,24 @@ public class MySqlAdmin(ILogger<MySqlAdmin> logger, MySqlIni mySqlIni) : BasePro
         var sql = $"UPDATE user SET password='{sha1Password}' WHERE username='{safeUsername}';";
         var args = $"{baseArguments} blis_revamp -e \"{sql}\"";
 
-        var result = await Execute(
+        bool hasError = false;
+
+        await Execute(
             MysqlPath,
             args,
             null,
-            (stdout) => logger.LogInformation("{Message}", stdout),
-            (stderr) => logger.LogWarning("{Message}", stderr)
+            (stdout) => logger.LogInformation("ResetUserPassword stdout: {Message}", stdout),
+            (stderr) =>
+            {
+                logger.LogWarning("ResetUserPassword stderr: {Message}", stderr);
+                // The password warning is harmless, ignore it
+                if (!stderr.Contains("Using a password on the command line interface"))
+                {
+                    hasError = true;
+                }
+            }
         );
 
-        return result.ExitCode == 0;
+        return !hasError;
     }
 }

@@ -8,8 +8,17 @@ public partial class PasswordResetDialog : Window
     public PasswordResetDialog()
     {
         InitializeComponent();
+    }
 
-        var vm = new PasswordResetViewModel();
+    public PasswordResetDialog(PasswordResetViewModel vm)
+    {
+        DataContext = vm;
+        InitializeComponent();
+        vm.CloseDialog = () => Close();
+    }
+
+    public void SetViewModel(PasswordResetViewModel vm)
+    {
         vm.CloseDialog = () => Close();
         DataContext = vm;
     }

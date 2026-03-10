@@ -137,8 +137,11 @@ public class ServerControlViewModel : ViewModelBase
     private void HandleOpenPasswordReset()
     {
         if (_lifetime.MainWindow is null) return;
+        System.Diagnostics.Debug.WriteLine($"_mySqlAdmin is null: {_mySqlAdmin is null}");
         var viewModel = new PasswordResetViewModel(_mySqlAdmin);
-        var dialog = new BLIS_NG.Views.PasswordResetDialog { DataContext = viewModel };
+        System.Diagnostics.Debug.WriteLine($"ViewModel created, DataContext will be: {viewModel.GetType().Name}");
+        var dialog = new BLIS_NG.Views.PasswordResetDialog(viewModel);
+        System.Diagnostics.Debug.WriteLine($"Dialog DataContext is: {dialog.DataContext?.GetType().Name ?? "NULL"}");
         dialog.ShowDialog(_lifetime.MainWindow);
     }
 }
