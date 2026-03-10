@@ -1,10 +1,15 @@
 using System.Reactive;
+using System.Security.Cryptography;
+using System.Text;
 using ReactiveUI;
+using BLIS_NG.Server;
 
 namespace BLIS_NG.ViewModels;
 
 public class PasswordResetViewModel : ViewModelBase
 {
+    private readonly MySqlAdmin _mySqlAdmin;
+
     public ReactiveCommand<Unit, Unit> ResetPasswordCommand { get; }
     public ReactiveCommand<Unit, Unit> CancelCommand { get; }
 
@@ -42,15 +47,6 @@ public class PasswordResetViewModel : ViewModelBase
 
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
-    // Callback so the dialog can close itself (set from the View's code-behind)
-    public Action? CloseDialog { get; set; }
-
-    public PasswordResetViewModel()
-    {
-        ResetPasswordCommand = ReactiveCommand.Create(HandleReset);
-        CancelCommand = ReactiveCommand.Create(HandleCancel);
-    }
-
     private string _successMessage = string.Empty;
     public string SuccessMessage
     {
@@ -64,10 +60,27 @@ public class PasswordResetViewModel : ViewModelBase
 
     public bool HasSuccess => !string.IsNullOrEmpty(SuccessMessage);
 
+    // Callback so the dialog can close itself (set from the View's code-behind)
+    public Action? CloseDialog { get; set; }
 
-    private void HandleReset()
+    public PasswordResetViewModel(MySqlAdmin mySqlAdmin)
     {
-        // Basic validation
+        _mySqlAdmin = mySqlAdmin;
+        ResetPasswordCommand = ReactiveCommand.CreateFromTask(HandleResetAsync);
+        CancelCommand = ReactiveCommand.Create(HandleCancel);
+    }
+
+    private static string HashPasswordSha1(string password)
+    {
+        var bytes = SHA1.HashData(Encoding.UTF8.GetBytes(password));
+        return Convert.ToHexString(bytes).ToLowerInvariant();
+    }
+
+    private async Task HandleResetAsync()
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+
         if (string.IsNullOrWhiteSpace(Username))
         {
             ErrorMessage = "Username is required.";
@@ -84,14 +97,20 @@ public class PasswordResetViewModel : ViewModelBase
             return;
         }
 
-        ErrorMessage = string.Empty;
+        var sha1Hash = HashPasswordSha1(NewPassword);
+        var success = await _mySqlAdmin.ResetUserPassword(Username, sha1Hash);
 
-        // TODO: wire up SHA1 hashing + MysqlAdmin DB call here in real implementation
-        SuccessMessage = "Password reset successful!";
-        Username = string.Empty;
-        NewPassword = string.Empty;
-        ConfirmPassword = string.Empty;
-
+        if (success)
+        {
+            SuccessMessage = "Password reset successful!";
+            Username = string.Empty;
+            NewPassword = string.Empty;
+            ConfirmPassword = string.Empty;
+        }
+        else
+        {
+            ErrorMessage = "Failed to reset password. Please check the username and try again.";
+        }
     }
 
     private void HandleCancel()

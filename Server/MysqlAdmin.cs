@@ -13,6 +13,10 @@ public class MySqlAdmin(ILogger<MySqlAdmin> logger, MySqlIni mySqlIni) : BasePro
       mySqlIni.SERVER_BASE_DIR, "mysql", "bin", "mysqladmin.exe"
     );
 
+    public readonly string MysqlPath = Path.Combine(
+    mySqlIni.SERVER_BASE_DIR, "mysql", "bin", "mysql.exe"
+    );
+
     private readonly ILogger<MySqlAdmin> logger = logger;
     private readonly string baseArguments = $"-u{MySqlIni.MYSQL_ROOT_USER} -p{MySqlIni.MYSQL_ROOT_PASSWORD} -h {MySqlIni.MYSQL_BIND_ADDRESS} --port {MySqlIni.MYSQL_PORT}";
 
@@ -32,5 +36,21 @@ public class MySqlAdmin(ILogger<MySqlAdmin> logger, MySqlIni mySqlIni) : BasePro
     public async Task Shutdown()
     {
         await Execute(MysqlAdminPath, $"{baseArguments} shutdown", null, (stdout) => logger.LogInformation("{Message}", stdout), (stderr) => logger.LogWarning("{Message}", stderr));
+    }
+    public async Task<bool> ResetUserPassword(string username, string sha1Password)
+    {
+        var safeUsername = username.Replace("'", "\\'");
+        var sql = $"UPDATE user SET password='{sha1Password}' WHERE username='{safeUsername}';";
+        var args = $"{baseArguments} blis_revamp -e \"{sql}\"";
+
+        var result = await Execute(
+            MysqlPath,
+            args,
+            null,
+            (stdout) => logger.LogInformation("{Message}", stdout),
+            (stderr) => logger.LogWarning("{Message}", stderr)
+        );
+
+        return result.ExitCode == 0;
     }
 }

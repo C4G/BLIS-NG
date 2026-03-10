@@ -17,6 +17,8 @@ public class ServerControlViewModel : ViewModelBase
 
     private readonly IClassicDesktopStyleApplicationLifetime _lifetime;
 
+    private readonly MySqlAdmin _mySqlAdmin;
+
     public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
     public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
 
@@ -45,11 +47,12 @@ public class ServerControlViewModel : ViewModelBase
 
     public bool ProbablyRunning { get; private set; }
 
-    public ServerControlViewModel(ILogger<ServerControlViewModel> logger, IMainServer mainServer, IClassicDesktopStyleApplicationLifetime lifetime)
+    public ServerControlViewModel(ILogger<ServerControlViewModel> logger, IMainServer mainServer, IClassicDesktopStyleApplicationLifetime lifetime, MySqlAdmin mySqlAdmin)
     {
         this.logger = logger;
         this.mainServer = mainServer;
         _lifetime = lifetime;
+        _mySqlAdmin = mySqlAdmin;
 
         StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
         StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
@@ -134,7 +137,8 @@ public class ServerControlViewModel : ViewModelBase
     private void HandleOpenPasswordReset()
     {
         if (_lifetime.MainWindow is null) return;
-        var dialog = new BLIS_NG.Views.PasswordResetDialog();
+        var viewModel = new PasswordResetViewModel(_mySqlAdmin);
+        var dialog = new BLIS_NG.Views.PasswordResetDialog { DataContext = viewModel };
         dialog.ShowDialog(_lifetime.MainWindow);
     }
 }
