@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Reactive;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 using BLIS_NG.Server;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
@@ -17,6 +18,7 @@ public class ServerControlViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
     public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
+    public ReactiveCommand<Unit, Unit> SelectZipCommand { get; }
 
     private string _status = string.Empty;
     public string Status
@@ -48,6 +50,7 @@ public class ServerControlViewModel : ViewModelBase
 
         StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
         StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
+        SelectZipCommand = ReactiveCommand.CreateFromTask(HandleSelectZipClick);
     }
 
     public void HandleStartButtonClick()
@@ -116,6 +119,38 @@ public class ServerControlViewModel : ViewModelBase
         catch (Exception e)
         {
             logger.LogError(e, "Could not open URL in browser: {Url}", url);
+        }
+    }
+
+    private async Task HandleSelectZipClick()
+    {
+        if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop 
+            && desktop.MainWindow != null)
+        {
+            // Access the StorageProvider from the TopLevel (Window)
+            var topLevel = Avalonia.Controls.TopLevel.GetTopLevel(desktop.MainWindow);
+            if (topLevel != null)
+            {
+                var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                {
+                    Title = "Select ZIP File",
+                    FileTypeFilter = new[] 
+                    { 
+                        new FilePickerFileType("ZIP Files") 
+                        { 
+                            Patterns = new[] { "*.zip" } 
+                        } 
+                    },
+                    AllowMultiple = false
+                });
+
+                if (files.Count > 0)
+                {
+                    var selectedPath = files[0].Path.LocalPath;
+                    logger.LogInformation("User selected ZIP file: {FilePath}", selectedPath);
+                    // The file path is now available in selectedPath for your logic
+                }
+            }
         }
     }
 
