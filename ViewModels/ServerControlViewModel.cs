@@ -3,8 +3,13 @@ using System.Reactive;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using BLIS_NG.Server;
+using BLIS_NG.Config;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using System.IO;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace BLIS_NG.ViewModels;
 
@@ -127,7 +132,6 @@ public class ServerControlViewModel : ViewModelBase
         if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop 
             && desktop.MainWindow != null)
         {
-            // Access the StorageProvider from the TopLevel (Window)
             var topLevel = Avalonia.Controls.TopLevel.GetTopLevel(desktop.MainWindow);
             if (topLevel != null)
             {
@@ -146,9 +150,13 @@ public class ServerControlViewModel : ViewModelBase
 
                 if (files.Count > 0)
                 {
-                    var selectedPath = files[0].Path.LocalPath;
-                    logger.LogInformation("User selected ZIP file: {FilePath}", selectedPath);
-                    // The file path is now available in selectedPath for your logic
+                    // Trigger the automated backup within the base directory
+                    CreateAutomatedDatabaseBackup();
+
+                    string selectedFile = files[0].Path.LocalPath;
+                    logger.LogInformation("Zip file selected: {FilePath}. Automated database backup initiated.", selectedFile);
+                    
+                    // Proceed with update/extraction logic here
                 }
             }
         }
@@ -159,5 +167,53 @@ public class ServerControlViewModel : ViewModelBase
         // Shutdown server when closing
         HandleStopButtonClick();
     }
-}
 
+    private void CreateAutomatedDatabaseBackup()
+    {
+        // 1. Resolve the Base Directory and define paths
+        string baseDir = ConfigurationFile.ResolveBaseDirectory();
+        string dbSource = Path.Combine(baseDir, "dbdir");
+        
+        // 2. Create the backup path: [BaseDir]/backups/DB_Backup_[Timestamp]
+        string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        string backupRoot = Path.Combine(baseDir, "backups");
+        string fullDestination = Path.Combine(backupRoot, $"DB_Backup_{timestamp}");
+
+        try 
+        {
+            if (Directory.Exists(dbSource))
+            {
+                logger.LogInformation("Creating automated backup at: {Path}", fullDestination);
+                
+                // Ensure the 'backups' root folder exists
+                Directory.CreateDirectory(backupRoot);
+                
+                // Perform the recursive copy
+                CopyDirectoryRecursive(dbSource, fullDestination);
+                
+                logger.LogInformation("Automated database backup completed.");
+            }
+            else
+            {
+                logger.LogWarning("Database source not found at {Path}. Backup aborted.", dbSource);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Automated backup failed.");
+        }
+    }
+
+    private void CopyDirectoryRecursive(string source, string target)
+    {
+        Directory.CreateDirectory(target);
+        foreach (string file in Directory.GetFiles(source))
+        {
+            File.Copy(file, Path.Combine(target, Path.GetFileName(file)), true);
+        }
+        foreach (string dir in Directory.GetDirectories(source))
+        {
+            CopyDirectoryRecursive(dir, Path.Combine(target, Path.GetFileName(dir)));
+        }
+    }
+}
