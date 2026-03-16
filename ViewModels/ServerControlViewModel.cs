@@ -150,13 +150,19 @@ public class ServerControlViewModel : ViewModelBase
 
                 if (files.Count > 0)
                 {
-                    // Trigger the automated backup within the base directory
-                    CreateAutomatedDatabaseBackup();
-
                     string selectedFile = files[0].Path.LocalPath;
-                    logger.LogInformation("Zip file selected: {FilePath}. Automated database backup initiated.", selectedFile);
                     
-                    // Proceed with update/extraction logic here
+                    // Launch the update window logic
+                    var updateVm = new UpdateProgressViewModel();
+                    var updateWindow = new Views.UpdateProgressWindow 
+                    { 
+                        DataContext = updateVm 
+                    };
+
+                    updateWindow.Show(desktop.MainWindow);
+
+                    // Start the update process and close window when done
+                    await updateVm.StartUpdate(selectedFile, () => updateWindow.Close());
                 }
             }
         }
