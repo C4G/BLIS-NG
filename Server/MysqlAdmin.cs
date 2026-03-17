@@ -52,7 +52,7 @@ public class MySqlAdmin(ILogger<MySqlAdmin> logger, MySqlIni mySqlIni) : BasePro
             (stdout) => logger.LogInformation("ResetUserPassword stdout: {Message}", stdout),
             (stderr) =>
             {
-                logger.LogWarning("ResetUserPassword stderr: {Message}", stderr);
+                logger.LogWarning("{Message}", stderr);
                 // The password warning is harmless, ignore it
                 if (!stderr.Contains("Using a password on the command line interface"))
                     hasError = true;
