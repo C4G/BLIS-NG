@@ -1,9 +1,15 @@
 using System.Diagnostics;
 using System.Reactive;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 using BLIS_NG.Server;
+using BLIS_NG.Config;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using System.IO;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace BLIS_NG.ViewModels;
 
@@ -17,6 +23,7 @@ public class ServerControlViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
     public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
+    public ReactiveCommand<Unit, Unit> SelectZipCommand { get; }
 
     private string _status = string.Empty;
     public string Status
@@ -48,6 +55,7 @@ public class ServerControlViewModel : ViewModelBase
 
         StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
         StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
+        SelectZipCommand = ReactiveCommand.CreateFromTask(HandleSelectZipClick);
     }
 
     public void HandleStartButtonClick()
@@ -119,10 +127,99 @@ public class ServerControlViewModel : ViewModelBase
         }
     }
 
+    private async Task HandleSelectZipClick()
+    {
+        if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop 
+            && desktop.MainWindow != null)
+        {
+            var topLevel = Avalonia.Controls.TopLevel.GetTopLevel(desktop.MainWindow);
+            if (topLevel != null)
+            {
+                var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                {
+                    Title = "Select ZIP File",
+                    FileTypeFilter = new[] 
+                    { 
+                        new FilePickerFileType("ZIP Files") 
+                        { 
+                            Patterns = new[] { "*.zip" } 
+                        } 
+                    },
+                    AllowMultiple = false
+                });
+
+                if (files.Count > 0)
+                {
+                    string selectedFile = files[0].Path.LocalPath;
+                    
+                    // Launch the update window logic
+                    var updateVm = new UpdateProgressViewModel();
+                    var updateWindow = new Views.UpdateProgressWindow 
+                    { 
+                        DataContext = updateVm 
+                    };
+
+                    updateWindow.Show(desktop.MainWindow);
+
+                    // Start the update process and close window when done
+                    await updateVm.StartUpdate(selectedFile, () => updateWindow.Close());
+                }
+            }
+        }
+    }
+
     public void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
         // Shutdown server when closing
         HandleStopButtonClick();
     }
-}
 
+    private void CreateAutomatedDatabaseBackup()
+    {
+        // 1. Resolve the Base Directory and define paths
+        string baseDir = ConfigurationFile.ResolveBaseDirectory();
+        string dbSource = Path.Combine(baseDir, "dbdir");
+        
+        // 2. Create the backup path: [BaseDir]/backups/DB_Backup_[Timestamp]
+        string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        string backupRoot = Path.Combine(baseDir, "backups");
+        string fullDestination = Path.Combine(backupRoot, $"DB_Backup_{timestamp}");
+
+        try 
+        {
+            if (Directory.Exists(dbSource))
+            {
+                logger.LogInformation("Creating automated backup at: {Path}", fullDestination);
+                
+                // Ensure the 'backups' root folder exists
+                Directory.CreateDirectory(backupRoot);
+                
+                // Perform the recursive copy
+                CopyDirectoryRecursive(dbSource, fullDestination);
+                
+                logger.LogInformation("Automated database backup completed.");
+            }
+            else
+            {
+                logger.LogWarning("Database source not found at {Path}. Backup aborted.", dbSource);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Automated backup failed.");
+        }
+    }
+
+    private void CopyDirectoryRecursive(string source, string target)
+    {
+        Directory.CreateDirectory(target);
+        foreach (string file in Directory.GetFiles(source))
+        {
+            File.Copy(file, Path.Combine(target, Path.GetFileName(file)), true);
+        }
+        foreach (string dir in Directory.GetDirectories(source))
+        {
+            CopyDirectoryRecursive(dir, Path.Combine(target, Path.GetFileName(dir)));
+        }
+    }
+}

@@ -1,0 +1,30 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:BLIS_NG.ViewModels"
+        x:Class="BLIS_NG.Views.UpdateProgressWindow"
+        x:DataType="vm:UpdateProgressViewModel"
+        Title="System Update" Width="400" Height="250"
+        WindowStartupLocation="CenterOwner" CanResize="False">
+    
+    <Border Padding="20">
+        <StackPanel Spacing="15">
+            <TextBlock Text="{Binding CurrentStageText}" 
+                       FontSize="16" 
+                       FontWeight="Bold" 
+                       HorizontalAlignment="Center"/>
+            
+            <TextBlock Text="{Binding ProgressText}" 
+                       HorizontalAlignment="Center"/>
+            
+            <ProgressBar Value="{Binding Percent}" 
+                         Minimum="0" 
+                         Maximum="100" 
+                         Height="20"/>
+            
+            <TextBlock Text="{Binding StatusMessage}" 
+                       HorizontalAlignment="Center" 
+                       FontSize="14" 
+                       Foreground="{Binding StatusColor}"/>
+        </StackPanel>
+    </Border>
+</Window>
