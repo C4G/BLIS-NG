@@ -73,29 +73,40 @@
             C4G BLIS has been licensed under the GNU General Public License version 3. For more information, visit blis.cc.gatech.edu.
         </TextBlock>
 
-        <Button
-            Width="160"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Center"
-            Grid.Row="4"
-            Grid.Column="3"
-            Grid.ColumnSpan="2"
-            Command="{Binding OpenPasswordResetCommand}">
-            Reset Password
-        </Button>
-
 
         <StackPanel
             Orientation="Horizontal"
             Spacing="15"
             Grid.Row="5"
             Grid.Column="0"
-            Grid.ColumnSpan="5"
-        >
-            <TextBlock Width="240" VerticalAlignment="Center" Text="{Binding Status}"></TextBlock>
-            <Button Width="80" Command="{Binding StartServerCommand}" IsEnabled="{Binding StartBlisEnabled}">Start BLIS</Button>
-            <Button Width="80" Command="{Binding StopServerCommand}" IsEnabled="{Binding StopBlisEnabled}">Stop BLIS</Button>
-            <Button Width="160" Command="{Binding SelectZipCommand}" Content="Update with ZIP File" />
-    </StackPanel>
+            Grid.ColumnSpan="5">
+
+            <TextBlock Width="240" VerticalAlignment="Center" Text="{Binding Status}" />
+
+            <Button Width="110" Height="45"
+                    Command="{Binding StartServerCommand}"
+                    IsEnabled="{Binding StartBlisEnabled}"
+                    Content="Start BLIS"
+                    VerticalContentAlignment="Center"
+                    HorizontalContentAlignment="Center" />
+
+            <Button Width="110" Height="45"
+                    Command="{Binding StopServerCommand}"
+                    IsEnabled="{Binding StopBlisEnabled}"
+                    Content="Stop BLIS"
+                    VerticalContentAlignment="Center"
+                    HorizontalContentAlignment="Center" />
+
+            <Button Content="More Options" Width="110" Height="45" VerticalContentAlignment="Center">
+                <Button.Flyout>
+                    <MenuFlyout Placement="Bottom">
+                        <MenuItem Header="Update with ZIP File"
+                                Command="{Binding SelectZipCommand}" />
+                        <Separator /> <MenuItem Header="Reset Password"
+                          Command="{Binding OpenPasswordResetCommand}" />
+                        </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+        </StackPanel>
     </Grid>
 </Window>
