@@ -21,8 +21,14 @@ public class ServerControlViewModel : ViewModelBase
     private readonly ILogger<ServerControlViewModel> logger;
     private readonly IMainServer mainServer;
 
+    private readonly IClassicDesktopStyleApplicationLifetime _lifetime;
+
+    private readonly MySqlAdmin _mySqlAdmin;
+
     public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
     public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> OpenPasswordResetCommand { get; }
     public ReactiveCommand<Unit, Unit> SelectZipCommand { get; }
 
     private string _status = string.Empty;
@@ -48,13 +54,16 @@ public class ServerControlViewModel : ViewModelBase
 
     public bool ProbablyRunning { get; private set; }
 
-    public ServerControlViewModel(ILogger<ServerControlViewModel> logger, IMainServer mainServer)
+    public ServerControlViewModel(ILogger<ServerControlViewModel> logger, IMainServer mainServer, IClassicDesktopStyleApplicationLifetime lifetime, MySqlAdmin mySqlAdmin)
     {
         this.logger = logger;
         this.mainServer = mainServer;
+        _lifetime = lifetime;
+        _mySqlAdmin = mySqlAdmin;
 
         StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
         StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
+        OpenPasswordResetCommand = ReactiveCommand.Create(HandleOpenPasswordReset);
         SelectZipCommand = ReactiveCommand.CreateFromTask(HandleSelectZipClick);
     }
 
@@ -71,7 +80,8 @@ public class ServerControlViewModel : ViewModelBase
 
     public async void HandleStopButtonClick()
     {
-        if (StopBlisEnabled) {
+        if (StopBlisEnabled)
+        {
             await mainServer.Stop();
         }
     }
@@ -98,7 +108,7 @@ public class ServerControlViewModel : ViewModelBase
             StartBlisEnabled = true;
             StopBlisEnabled = false;
             ProbablyRunning = true;
-        } 
+        }
         else if (serverStatus.Apache2 == MainServer.State.Stopping || serverStatus.MySql == MainServer.State.Stopping)
         {
             Status = "Status: Stopping";
@@ -129,7 +139,7 @@ public class ServerControlViewModel : ViewModelBase
 
     private async Task HandleSelectZipClick()
     {
-        if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop 
+        if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
             && desktop.MainWindow != null)
         {
             var topLevel = Avalonia.Controls.TopLevel.GetTopLevel(desktop.MainWindow);
@@ -138,12 +148,12 @@ public class ServerControlViewModel : ViewModelBase
                 var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
                 {
                     Title = "Select ZIP File",
-                    FileTypeFilter = new[] 
-                    { 
-                        new FilePickerFileType("ZIP Files") 
-                        { 
-                            Patterns = new[] { "*.zip" } 
-                        } 
+                    FileTypeFilter = new[]
+                    {
+                        new FilePickerFileType("ZIP Files")
+                        {
+                            Patterns = new[] { "*.zip" }
+                        }
                     },
                     AllowMultiple = false
                 });
@@ -151,12 +161,12 @@ public class ServerControlViewModel : ViewModelBase
                 if (files.Count > 0)
                 {
                     string selectedFile = files[0].Path.LocalPath;
-                    
+
                     // Launch the update window logic
                     var updateVm = new UpdateProgressViewModel();
-                    var updateWindow = new Views.UpdateProgressWindow 
-                    { 
-                        DataContext = updateVm 
+                    var updateWindow = new Views.UpdateProgressWindow
+                    {
+                        DataContext = updateVm
                     };
 
                     updateWindow.Show(desktop.MainWindow);
@@ -173,30 +183,40 @@ public class ServerControlViewModel : ViewModelBase
         // Shutdown server when closing
         HandleStopButtonClick();
     }
+    private void HandleOpenPasswordReset()
+    {
+        if (_lifetime.MainWindow is null) return;
+        System.Diagnostics.Debug.WriteLine($"_mySqlAdmin is null: {_mySqlAdmin is null}");
+        var viewModel = new PasswordResetViewModel(_mySqlAdmin);
+        System.Diagnostics.Debug.WriteLine($"ViewModel created, DataContext will be: {viewModel.GetType().Name}");
+        var dialog = new BLIS_NG.Views.PasswordResetDialog(viewModel);
+        System.Diagnostics.Debug.WriteLine($"Dialog DataContext is: {dialog.DataContext?.GetType().Name ?? "NULL"}");
+        dialog.ShowDialog(_lifetime.MainWindow);
+    }
 
     private void CreateAutomatedDatabaseBackup()
     {
         // 1. Resolve the Base Directory and define paths
         string baseDir = ConfigurationFile.ResolveBaseDirectory();
         string dbSource = Path.Combine(baseDir, "dbdir");
-        
+
         // 2. Create the backup path: [BaseDir]/backups/DB_Backup_[Timestamp]
         string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         string backupRoot = Path.Combine(baseDir, "backups");
         string fullDestination = Path.Combine(backupRoot, $"DB_Backup_{timestamp}");
 
-        try 
+        try
         {
             if (Directory.Exists(dbSource))
             {
                 logger.LogInformation("Creating automated backup at: {Path}", fullDestination);
-                
+
                 // Ensure the 'backups' root folder exists
                 Directory.CreateDirectory(backupRoot);
-                
+
                 // Perform the recursive copy
                 CopyDirectoryRecursive(dbSource, fullDestination);
-                
+
                 logger.LogInformation("Automated database backup completed.");
             }
             else
