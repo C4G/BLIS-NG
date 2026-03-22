@@ -19,6 +19,7 @@ public class ServerControlViewModel : ViewModelBase
     public static string AppVersion { get { return $"BLIS for Windows {AppVersionNumber}"; } }
 
     private readonly ILogger<ServerControlViewModel> logger;
+    private readonly ILoggerFactory _loggerFactory;
     private readonly IMainServer mainServer;
 
     private readonly IClassicDesktopStyleApplicationLifetime _lifetime;
@@ -54,9 +55,10 @@ public class ServerControlViewModel : ViewModelBase
 
     public bool ProbablyRunning { get; private set; }
 
-    public ServerControlViewModel(ILogger<ServerControlViewModel> logger, IMainServer mainServer, IClassicDesktopStyleApplicationLifetime lifetime, MySqlAdmin mySqlAdmin)
+    public ServerControlViewModel(ILogger<ServerControlViewModel> logger, ILoggerFactory loggerFactory, IMainServer mainServer, IClassicDesktopStyleApplicationLifetime lifetime, MySqlAdmin mySqlAdmin)
     {
         this.logger = logger;
+        _loggerFactory = loggerFactory;
         this.mainServer = mainServer;
         _lifetime = lifetime;
         _mySqlAdmin = mySqlAdmin;
@@ -163,7 +165,9 @@ public class ServerControlViewModel : ViewModelBase
                     string selectedFile = files[0].Path.LocalPath;
 
                     // Launch the update window logic
-                    var updateVm = new UpdateProgressViewModel();
+                    var updateLogger = Microsoft.Extensions.Logging.LoggerFactoryExtensions
+                        .CreateLogger<UpdateProgressViewModel>(_loggerFactory);
+                    var updateVm = new UpdateProgressViewModel(updateLogger, mainServer);
                     var updateWindow = new Views.UpdateProgressWindow
                     {
                         DataContext = updateVm
