@@ -8,6 +8,17 @@ namespace BLIS_NG.ViewModels;
 
 public class PasswordResetViewModel : ViewModelBase
 {
+    // role hierarchy dictionary
+    private static readonly Dictionary<int, int> RolePower = new()
+    {
+        { 0, 1 },  // TECH_RW
+        { 1, 1 },  // TECH_RO
+        { 5, 1 },  // CLERK
+        { 2, 2 },  // ADMIN
+        { 4, 3 },  // COUNTRYDIR
+        { 3, 4 },  // SUPERADMIN
+    };
+
     private readonly MySqlAdmin _mySqlAdmin;
 
     public ReactiveCommand<Unit, Unit> ProceedToVerifyCommand { get; }
@@ -92,55 +103,71 @@ public class PasswordResetViewModel : ViewModelBase
     }
     public bool HasSuccess => !string.IsNullOrEmpty(SuccessMessage);
 
-    public Action? CloseDialog { get; set; }
 
     public PasswordResetViewModel(MySqlAdmin mySqlAdmin)
     {
         _mySqlAdmin = mySqlAdmin;
         ProceedToVerifyCommand = ReactiveCommand.Create(HandleProceedToVerify);
-        ConfirmResetCommand    = ReactiveCommand.CreateFromTask(HandleConfirmResetAsync);
-        BackCommand            = ReactiveCommand.Create(HandleBack);
-        CancelCommand          = ReactiveCommand.Create(HandleCancel);
+        ConfirmResetCommand = ReactiveCommand.CreateFromTask(HandleConfirmResetAsync);
+        BackCommand = ReactiveCommand.Create(HandleBack);
+        CancelCommand = ReactiveCommand.Create(HandleCancel);
     }
 
     private static string HashPasswordSha1(string password)
     {
         var salted = password + "This comment should suffice as salt.";
-        var bytes  = SHA1.HashData(Encoding.UTF8.GetBytes(salted));
+        var bytes = SHA1.HashData(Encoding.UTF8.GetBytes(salted));
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
     private void HandleProceedToVerify()
     {
-        ErrorMessage   = string.Empty;
+        ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
 
-        if (string.IsNullOrWhiteSpace(Username))    { ErrorMessage = "Username is required.";     return; }
+        if (string.IsNullOrWhiteSpace(Username)) { ErrorMessage = "Username is required."; return; }
         if (string.IsNullOrWhiteSpace(NewPassword)) { ErrorMessage = "New password is required."; return; }
-        if (NewPassword != ConfirmPassword)          { ErrorMessage = "Passwords do not match.";   return; }
+        if (NewPassword != ConfirmPassword) { ErrorMessage = "Passwords do not match."; return; }
 
         CurrentStep = 2;
     }
 
     private async Task HandleConfirmResetAsync()
     {
-        ErrorMessage   = string.Empty;
+        ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
 
         if (string.IsNullOrWhiteSpace(SupervisorUsername)) { ErrorMessage = "Supervisor username is required."; return; }
         if (string.IsNullOrWhiteSpace(SupervisorPassword)) { ErrorMessage = "Supervisor password is required."; return; }
 
         var supervisorHash = HashPasswordSha1(SupervisorPassword);
-        var verified = await _mySqlAdmin.VerifyHigherRankedUser(SupervisorUsername, supervisorHash);
+        var supervisorLevel = await _mySqlAdmin.GetVerifiedUserLevel(SupervisorUsername, supervisorHash);
 
-        if (!verified)
+        if (supervisorLevel is null)
         {
-            ErrorMessage = "Supervisor verification failed. Invalid credentials or insufficient rank.";
+            ErrorMessage = "Supervisor verification failed. Invalid credentials.";
+            return;
+        }
+
+        var targetLevel = await _mySqlAdmin.GetUserLevel(Username);
+
+        if (targetLevel is null)
+        {
+            ErrorMessage = $"Could not find user '{Username}'.";
+            return;
+        }
+
+        var supervisorPower = RolePower.GetValueOrDefault(supervisorLevel.Value, 0);
+        var targetPower = RolePower.GetValueOrDefault(targetLevel.Value, 0);
+
+        if (supervisorPower <= targetPower)
+        {
+            ErrorMessage = "Supervisor does not have sufficient rank to reset this user's password.";
             return;
         }
 
         var sha1Hash = HashPasswordSha1(NewPassword);
-        var success  = await _mySqlAdmin.ResetUserPassword(Username, sha1Hash);
+        var success = await _mySqlAdmin.ResetUserPassword(Username, sha1Hash);
 
         if (success)
             SuccessMessage = $"Password for '{Username}' was reset successfully.";
@@ -151,20 +178,20 @@ public class PasswordResetViewModel : ViewModelBase
     private void HandleBack()
     {
         ErrorMessage = string.Empty;
-        CurrentStep  = 1;
+        CurrentStep = 1;
     }
 
-    private void HandleCancel() => CloseDialog?.Invoke();
+    private void HandleCancel() => ResetForm();
 
     public void ResetForm()
     {
-        Username           = string.Empty;
-        NewPassword        = string.Empty;
-        ConfirmPassword    = string.Empty;
+        Username = string.Empty;
+        NewPassword = string.Empty;
+        ConfirmPassword = string.Empty;
         SupervisorUsername = string.Empty;
         SupervisorPassword = string.Empty;
-        ErrorMessage       = string.Empty;
-        SuccessMessage     = string.Empty;
-        CurrentStep        = 1;
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        CurrentStep = 1;
     }
 }
