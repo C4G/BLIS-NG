@@ -25,7 +25,7 @@ public class UpdateProgressViewModel : ViewModelBase
     private readonly IMainServer _mainServer;
 
     private string _currentStageText = "Initializing...";
-    private string _progressText = "0/4 Stages";
+    private string _progressText = "0 of 9";
     private string _statusMessage = "Update In Progress";
     private int _percent = 0;
     private IBrush _statusColor = Brushes.Black;
@@ -35,6 +35,8 @@ public class UpdateProgressViewModel : ViewModelBase
     public string StatusMessage { get => _statusMessage; set => this.RaiseAndSetIfChanged(ref _statusMessage, value); }
     public int Percent { get => _percent; set => this.RaiseAndSetIfChanged(ref _percent, value); }
     public IBrush StatusColor { get => _statusColor; set => this.RaiseAndSetIfChanged(ref _statusColor, value); }
+
+    private const int TotalStages = 9;
 
     public UpdateProgressViewModel(ILogger<UpdateProgressViewModel> logger, IMainServer mainServer)
     {
@@ -48,14 +50,19 @@ public class UpdateProgressViewModel : ViewModelBase
 
         try
         {
-            // Stage 1: Data Backup
-            UpdateStage(1, "Stage 1: Backing up data...");
+            // Stage 1: Database backup
+            UpdateStage(1, "Backing up database...");
             _logger.LogInformation("Starting update from ZIP: {ZipPath}", zipPath);
             CreateAutomatedDatabaseBackup(baseDir);
-            await Task.Delay(1000);
 
-            // Stage 2: Unpack, copy files, replace exe
-            UpdateStage(2, "Stage 2: Unpacking ZIP file...");
+            // Stage 2: Stop servers
+            UpdateStage(2, "Stopping servers...");
+            _logger.LogInformation("Stopping servers before update.");
+            await _mainServer.Stop();
+            _logger.LogInformation("Servers stopped.");
+
+            // Stage 3: Unpack ZIP
+            UpdateStage(3, "Unpacking ZIP file...");
             string stagingPath = Path.Combine(baseDir, StagingDir);
             string effectiveStagingPath = "";
             await Task.Run(() => effectiveStagingPath = UnpackZip(zipPath, stagingPath));
@@ -75,8 +82,8 @@ public class UpdateProgressViewModel : ViewModelBase
             string currentVersion = state.ActiveVersion;
             _logger.LogInformation("Current active version: {CurrentVersion}", currentVersion);
 
-            // Backup current server folder
-            UpdateStage(2, "Stage 2: Backing up current server...");
+            // Stage 4: Backup current server
+            UpdateStage(4, "Backing up current server...");
             string serverPath = Path.Combine(baseDir, ServerDir);
             if (Directory.Exists(serverPath))
             {
@@ -92,8 +99,8 @@ public class UpdateProgressViewModel : ViewModelBase
                 _logger.LogWarning("No existing server directory found at {ServerPath}. Skipping server backup.", serverPath);
             }
 
-            // Copy new server folder from staging
-            UpdateStage(2, "Stage 2: Installing new server...");
+            // Stage 5: Install new server
+            UpdateStage(5, "Installing new server...");
             string stagingServerPath = Path.Combine(effectiveStagingPath, ServerDir);
             if (Directory.Exists(stagingServerPath))
             {
@@ -106,8 +113,8 @@ public class UpdateProgressViewModel : ViewModelBase
                 _logger.LogWarning("No server directory found in update package at {Path}.", stagingServerPath);
             }
 
-            // Copy everything else (except BLIS-NG.exe and server/) into releases/NEW_VERSION/
-            UpdateStage(2, "Stage 2: Installing release files...");
+            // Stage 6: Install release files
+            UpdateStage(6, "Installing release files...");
             string releasePath = Path.Combine(baseDir, ReleasesDir, newVersion);
             _logger.LogInformation("Copying release files to {ReleasePath}.", releasePath);
             Directory.CreateDirectory(releasePath);
@@ -128,21 +135,15 @@ public class UpdateProgressViewModel : ViewModelBase
             }
             _logger.LogInformation("Release files installed.");
 
-            // Update state.json
-            UpdateStage(2, "Stage 2: Updating state...");
+            // Stage 7: Update configuration
+            UpdateStage(7, "Updating configuration...");
             state.PreviousVersion = currentVersion;
             state.ActiveVersion = newVersion;
             state.Save(baseDir);
             _logger.LogInformation("state.json updated: active_version={NewVersion}, previous_version={CurrentVersion}", newVersion, currentVersion);
 
-            // Stop servers before replacing the executable
-            UpdateStage(2, "Stage 2: Stopping servers...");
-            _logger.LogInformation("Stopping servers before executable replacement.");
-            await _mainServer.Stop();
-            _logger.LogInformation("Servers stopped.");
-
-            // Replace BLIS-NG.exe
-            UpdateStage(2, "Stage 2: Replacing executable...");
+            // Stage 8: Replace executable
+            UpdateStage(8, "Replacing executable...");
             string currentExePath = Path.Combine(baseDir, ExeName);
             string oldExePath = Path.Combine(baseDir, OldExeName);
             string? newExePath = FindFileRecursive(effectiveStagingPath, ExeName);
@@ -153,8 +154,8 @@ public class UpdateProgressViewModel : ViewModelBase
             }
             ReplaceExecutable(currentExePath, oldExePath, newExePath);
 
-            // Launch the new executable and exit
-            UpdateStage(2, "Stage 2: Launching updated application...");
+            // Stage 9: Launch new application
+            UpdateStage(9, "Launching updated application...");
             LaunchNewExecutable(currentExePath, baseDir);
 
             Percent = 100;
@@ -244,9 +245,9 @@ public class UpdateProgressViewModel : ViewModelBase
 
     private void UpdateStage(int stage, string text)
     {
-        CurrentStageText = text;
-        ProgressText = $"{stage}/4 Stages";
-        Percent = (int)((stage - 1) / 4.0 * 100);
+        CurrentStageText = $"Step {stage}/{TotalStages}: {text}";
+        ProgressText = $"{stage} of {TotalStages}";
+        Percent = (int)((stage - 1) / (double)TotalStages * 100);
     }
 
     private void CreateAutomatedDatabaseBackup(string baseDir)
