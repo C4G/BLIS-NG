@@ -57,13 +57,14 @@ public class UpdateProgressViewModel : ViewModelBase
             // Stage 2: Unpack, copy files, replace exe
             UpdateStage(2, "Stage 2: Unpacking ZIP file...");
             string stagingPath = Path.Combine(baseDir, StagingDir);
-            await Task.Run(() => UnpackZip(zipPath, stagingPath));
+            string effectiveStagingPath = "";
+            await Task.Run(() => effectiveStagingPath = UnpackZip(zipPath, stagingPath));
 
             // Read version.json from staging to get NEW_VERSION
-            var versionFile = VersionFile.Load(stagingPath);
+            var versionFile = VersionFile.Load(effectiveStagingPath);
             if (versionFile == null || string.IsNullOrWhiteSpace(versionFile.Version))
             {
-                _logger.LogError("version.json not found or missing version field in {StagingPath}.", stagingPath);
+                _logger.LogError("version.json not found or missing version field in {StagingPath}.", effectiveStagingPath);
                 throw new FileNotFoundException("version.json was not found or is invalid in the update package.");
             }
             string newVersion = versionFile.Version;
@@ -93,7 +94,7 @@ public class UpdateProgressViewModel : ViewModelBase
 
             // Copy new server folder from staging
             UpdateStage(2, "Stage 2: Installing new server...");
-            string stagingServerPath = Path.Combine(stagingPath, ServerDir);
+            string stagingServerPath = Path.Combine(effectiveStagingPath, ServerDir);
             if (Directory.Exists(stagingServerPath))
             {
                 _logger.LogInformation("Copying new server from {Source} to {Destination}.", stagingServerPath, serverPath);
@@ -111,14 +112,14 @@ public class UpdateProgressViewModel : ViewModelBase
             _logger.LogInformation("Copying release files to {ReleasePath}.", releasePath);
             Directory.CreateDirectory(releasePath);
 
-            foreach (var dir in Directory.GetDirectories(stagingPath))
+            foreach (var dir in Directory.GetDirectories(effectiveStagingPath))
             {
                 string dirName = Path.GetFileName(dir);
                 if (string.Equals(dirName, ServerDir, StringComparison.OrdinalIgnoreCase))
                     continue;
                 CopyDirectoryRecursive(dir, Path.Combine(releasePath, dirName));
             }
-            foreach (var file in Directory.GetFiles(stagingPath))
+            foreach (var file in Directory.GetFiles(effectiveStagingPath))
             {
                 string fileName = Path.GetFileName(file);
                 if (string.Equals(fileName, ExeName, StringComparison.OrdinalIgnoreCase))
@@ -144,10 +145,10 @@ public class UpdateProgressViewModel : ViewModelBase
             UpdateStage(2, "Stage 2: Replacing executable...");
             string currentExePath = Path.Combine(baseDir, ExeName);
             string oldExePath = Path.Combine(baseDir, OldExeName);
-            string? newExePath = FindFileRecursive(stagingPath, ExeName);
+            string? newExePath = FindFileRecursive(effectiveStagingPath, ExeName);
             if (newExePath == null)
             {
-                _logger.LogError("{ExeName} not found in staging at {StagingPath}.", ExeName, stagingPath);
+                _logger.LogError("{ExeName} not found in staging at {StagingPath}.", ExeName, effectiveStagingPath);
                 throw new FileNotFoundException($"{ExeName} was not found in the update package.");
             }
             ReplaceExecutable(currentExePath, oldExePath, newExePath);
@@ -177,7 +178,12 @@ public class UpdateProgressViewModel : ViewModelBase
         }
     }
 
-    private void UnpackZip(string zipPath, string stagingPath)
+    /// <summary>
+    /// Extracts the ZIP and returns the effective root path of the contents.
+    /// If the ZIP contains a single root folder, returns that folder's path
+    /// so the rest of the code doesn't need to know about the ZIP's internal structure.
+    /// </summary>
+    private string UnpackZip(string zipPath, string stagingPath)
     {
         if (Directory.Exists(stagingPath))
         {
@@ -188,6 +194,17 @@ public class UpdateProgressViewModel : ViewModelBase
         _logger.LogInformation("Extracting ZIP to {StagingPath}.", stagingPath);
         ZipFile.ExtractToDirectory(zipPath, stagingPath);
         _logger.LogInformation("ZIP extraction completed.");
+
+        // If the ZIP had a single root folder, use that as the effective staging root
+        var dirs = Directory.GetDirectories(stagingPath);
+        var files = Directory.GetFiles(stagingPath);
+        if (dirs.Length == 1 && files.Length == 0)
+        {
+            _logger.LogInformation("ZIP contained single root folder: {Folder}. Using it as staging root.", Path.GetFileName(dirs[0]));
+            return dirs[0];
+        }
+
+        return stagingPath;
     }
 
     private static string? FindFileRecursive(string directory, string fileName)
