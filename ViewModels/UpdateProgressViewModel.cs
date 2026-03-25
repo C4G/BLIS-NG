@@ -17,6 +17,9 @@ public class UpdateProgressViewModel : ViewModelBase
     private const string ExeName = "BLIS-NG.exe";
     private const string OldExeName = "BLIS-NG.exe.old";
     private const string StagingDir = "staging";
+    private const string ServerDir = "server";
+    private const string ReleasesDir = "releases";
+    private const string BackupsDir = "backups";
 
     private readonly ILogger<UpdateProgressViewModel> _logger;
     private readonly IMainServer _mainServer;
@@ -49,21 +52,87 @@ public class UpdateProgressViewModel : ViewModelBase
             UpdateStage(1, "Stage 1: Backing up data...");
             _logger.LogInformation("Starting update from ZIP: {ZipPath}", zipPath);
             CreateAutomatedDatabaseBackup(baseDir);
-            await Task.Delay(1000); // Small buffer for UX
+            await Task.Delay(1000);
 
-            // Stage 2: Unpack ZIP and replace BLIS-NG.exe
+            // Stage 2: Unpack, copy files, replace exe
             UpdateStage(2, "Stage 2: Unpacking ZIP file...");
             string stagingPath = Path.Combine(baseDir, StagingDir);
             await Task.Run(() => UnpackZip(zipPath, stagingPath));
 
-            UpdateStage(2, "Stage 2: Locating new executable...");
-            string? newExePath = FindFileRecursive(stagingPath, ExeName);
-            if (newExePath == null)
+            // Read version.json from staging to get NEW_VERSION
+            var versionFile = VersionFile.Load(stagingPath);
+            if (versionFile == null || string.IsNullOrWhiteSpace(versionFile.Version))
             {
-                _logger.LogError("{ExeName} not found in ZIP contents at {StagingPath}.", ExeName, stagingPath);
-                throw new FileNotFoundException($"{ExeName} was not found in the update package.");
+                _logger.LogError("version.json not found or missing version field in {StagingPath}.", stagingPath);
+                throw new FileNotFoundException("version.json was not found or is invalid in the update package.");
             }
-            _logger.LogInformation("Found new executable at: {NewExePath}", newExePath);
+            string newVersion = versionFile.Version;
+            _logger.LogInformation("Update package version: {NewVersion}", newVersion);
+
+            // Read current state
+            var state = StateFile.Load(baseDir);
+            string currentVersion = state.ActiveVersion;
+            _logger.LogInformation("Current active version: {CurrentVersion}", currentVersion);
+
+            // Backup current server folder
+            UpdateStage(2, "Stage 2: Backing up current server...");
+            string serverPath = Path.Combine(baseDir, ServerDir);
+            if (Directory.Exists(serverPath))
+            {
+                string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                string serverBackupPath = Path.Combine(baseDir, BackupsDir, $"server-{currentVersion}-{timestamp}");
+                _logger.LogInformation("Moving current server to backup: {BackupPath}", serverBackupPath);
+                Directory.CreateDirectory(Path.Combine(baseDir, BackupsDir));
+                Directory.Move(serverPath, serverBackupPath);
+                _logger.LogInformation("Server backup completed.");
+            }
+            else
+            {
+                _logger.LogWarning("No existing server directory found at {ServerPath}. Skipping server backup.", serverPath);
+            }
+
+            // Copy new server folder from staging
+            UpdateStage(2, "Stage 2: Installing new server...");
+            string stagingServerPath = Path.Combine(stagingPath, ServerDir);
+            if (Directory.Exists(stagingServerPath))
+            {
+                _logger.LogInformation("Copying new server from {Source} to {Destination}.", stagingServerPath, serverPath);
+                CopyDirectoryRecursive(stagingServerPath, serverPath);
+                _logger.LogInformation("New server installed.");
+            }
+            else
+            {
+                _logger.LogWarning("No server directory found in update package at {Path}.", stagingServerPath);
+            }
+
+            // Copy everything else (except BLIS-NG.exe and server/) into releases/NEW_VERSION/
+            UpdateStage(2, "Stage 2: Installing release files...");
+            string releasePath = Path.Combine(baseDir, ReleasesDir, newVersion);
+            _logger.LogInformation("Copying release files to {ReleasePath}.", releasePath);
+            Directory.CreateDirectory(releasePath);
+
+            foreach (var dir in Directory.GetDirectories(stagingPath))
+            {
+                string dirName = Path.GetFileName(dir);
+                if (string.Equals(dirName, ServerDir, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                CopyDirectoryRecursive(dir, Path.Combine(releasePath, dirName));
+            }
+            foreach (var file in Directory.GetFiles(stagingPath))
+            {
+                string fileName = Path.GetFileName(file);
+                if (string.Equals(fileName, ExeName, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                File.Copy(file, Path.Combine(releasePath, fileName), overwrite: true);
+            }
+            _logger.LogInformation("Release files installed.");
+
+            // Update state.json
+            UpdateStage(2, "Stage 2: Updating state...");
+            state.PreviousVersion = currentVersion;
+            state.ActiveVersion = newVersion;
+            state.Save(baseDir);
+            _logger.LogInformation("state.json updated: active_version={NewVersion}, previous_version={CurrentVersion}", newVersion, currentVersion);
 
             // Stop servers before replacing the executable
             UpdateStage(2, "Stage 2: Stopping servers...");
@@ -71,12 +140,19 @@ public class UpdateProgressViewModel : ViewModelBase
             await _mainServer.Stop();
             _logger.LogInformation("Servers stopped.");
 
-            // Rename running exe (Windows allows renaming a locked/running exe)
+            // Replace BLIS-NG.exe
+            UpdateStage(2, "Stage 2: Replacing executable...");
             string currentExePath = Path.Combine(baseDir, ExeName);
             string oldExePath = Path.Combine(baseDir, OldExeName);
+            string? newExePath = FindFileRecursive(stagingPath, ExeName);
+            if (newExePath == null)
+            {
+                _logger.LogError("{ExeName} not found in staging at {StagingPath}.", ExeName, stagingPath);
+                throw new FileNotFoundException($"{ExeName} was not found in the update package.");
+            }
             ReplaceExecutable(currentExePath, oldExePath, newExePath);
 
-            // Launch the new executable and exit the current process
+            // Launch the new executable and exit
             UpdateStage(2, "Stage 2: Launching updated application...");
             LaunchNewExecutable(currentExePath, baseDir);
 
@@ -88,7 +164,6 @@ public class UpdateProgressViewModel : ViewModelBase
             await Task.Delay(2000);
             onComplete();
 
-            // Exit the current process so the new one takes over
             Environment.Exit(0);
         }
         catch (Exception ex)
@@ -104,7 +179,6 @@ public class UpdateProgressViewModel : ViewModelBase
 
     private void UnpackZip(string zipPath, string stagingPath)
     {
-        // Clean up any previous staging directory
         if (Directory.Exists(stagingPath))
         {
             _logger.LogInformation("Removing previous staging directory at {StagingPath}.", stagingPath);
@@ -123,21 +197,18 @@ public class UpdateProgressViewModel : ViewModelBase
 
     private void ReplaceExecutable(string currentExePath, string oldExePath, string newExePath)
     {
-        // Remove any leftover .old file from a previous update
         if (File.Exists(oldExePath))
         {
             _logger.LogInformation("Removing leftover {OldExeName} from previous update.", OldExeName);
             File.Delete(oldExePath);
         }
 
-        // Rename the currently running exe — Windows allows this even while the file is locked
         if (File.Exists(currentExePath))
         {
             _logger.LogInformation("Renaming running executable {Current} to {Old}.", currentExePath, oldExePath);
             File.Move(currentExePath, oldExePath);
         }
 
-        // Copy the new executable into place
         _logger.LogInformation("Copying new executable from {Source} to {Destination}.", newExePath, currentExePath);
         File.Copy(newExePath, currentExePath, overwrite: false);
         _logger.LogInformation("Executable replacement completed.");
@@ -164,7 +235,7 @@ public class UpdateProgressViewModel : ViewModelBase
     private void CreateAutomatedDatabaseBackup(string baseDir)
     {
         string dbSource = Path.Combine(baseDir, "dbdir");
-        string backupRoot = Path.Combine(baseDir, "backups");
+        string backupRoot = Path.Combine(baseDir, BackupsDir);
         string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         string fullDestination = Path.Combine(backupRoot, $"DB_Backup_{timestamp}");
 
@@ -191,25 +262,32 @@ public class UpdateProgressViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// Cleans up leftover .old executable from a previous update.
-    /// Should be called early during application startup.
+    /// Cleans up leftover artifacts from a previous update on startup.
+    /// Deletes BLIS-NG.exe.old and the staging directory.
     /// </summary>
-    public static void CleanupOldExecutable()
+    public static void StartupCleanup()
     {
         try
         {
             string baseDir = ConfigurationFile.ResolveBaseDirectory();
+
             string oldExePath = Path.Combine(baseDir, OldExeName);
             if (File.Exists(oldExePath))
             {
                 File.Delete(oldExePath);
-                // Using Serilog static logger since this runs before DI is set up
                 Serilog.Log.Information("Cleaned up old executable: {Path}", oldExePath);
+            }
+
+            string stagingPath = Path.Combine(baseDir, StagingDir);
+            if (Directory.Exists(stagingPath))
+            {
+                Directory.Delete(stagingPath, recursive: true);
+                Serilog.Log.Information("Cleaned up staging directory: {Path}", stagingPath);
             }
         }
         catch (Exception ex)
         {
-            Serilog.Log.Warning(ex, "Failed to clean up old executable. Will retry on next startup.");
+            Serilog.Log.Warning(ex, "Failed to clean up update artifacts. Will retry on next startup.");
         }
     }
 }

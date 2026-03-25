@@ -16,7 +16,10 @@ public class HttpdConf : ConfigurationFile
     {
         APACHE2_BASE = Path.Combine(SERVER_BASE_DIR, "Apache");
         CONFIG_FILE_PATH = Path.Combine(APACHE2_BASE, "conf", "httpd.conf");
-        DOCROOT = Path.Combine(BASE_DIR, "releases", "dev", "htdocs");
+
+        var state = StateFile.Load(BASE_DIR);
+        DOCROOT = Path.Combine(BASE_DIR, "releases", state.ActiveVersion, "htdocs");
+
         PID_FILE = Path.Combine(TMP_DIR, "httpd.pid");
         LOCAL_DIR = Path.Combine(BASE_DIR, "local");
     }
