@@ -162,6 +162,8 @@ ServerAdmin mitchell.rysavy@gmail.com
 #
 ServerName {{ apache_ip }}
 
+SetEnv LOCAL_DIR "{{ local_dir }}"
+
 #
 # DocumentRoot: The directory out of which you will serve your
 # documents. By default, all requests are taken from this directory, but
