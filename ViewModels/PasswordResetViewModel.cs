@@ -19,7 +19,7 @@ public class PasswordResetViewModel : ViewModelBase
         { 3, 4 },  // SUPERADMIN
     };
 
-    private readonly MySqlAdmin _mySqlAdmin;
+    private readonly MySql _mySql;
 
     public ReactiveCommand<Unit, Unit> ProceedToVerifyCommand { get; }
     public ReactiveCommand<Unit, Unit> ConfirmResetCommand { get; }
@@ -104,9 +104,9 @@ public class PasswordResetViewModel : ViewModelBase
     public bool HasSuccess => !string.IsNullOrEmpty(SuccessMessage);
 
 
-    public PasswordResetViewModel(MySqlAdmin mySqlAdmin)
+    public PasswordResetViewModel(MySql mySql)
     {
-        _mySqlAdmin = mySqlAdmin;
+        _mySql = mySql;
         ProceedToVerifyCommand = ReactiveCommand.Create(HandleProceedToVerify);
         ConfirmResetCommand = ReactiveCommand.CreateFromTask(HandleConfirmResetAsync);
         BackCommand = ReactiveCommand.Create(HandleBack);
@@ -141,7 +141,7 @@ public class PasswordResetViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(SupervisorPassword)) { ErrorMessage = "Supervisor password is required."; return; }
 
         var supervisorHash = HashPasswordSha1(SupervisorPassword);
-        var supervisorLevel = await _mySqlAdmin.GetVerifiedUserLevel(SupervisorUsername, supervisorHash);
+        var supervisorLevel = await _mySql.GetVerifiedUserLevel(SupervisorUsername, supervisorHash);
 
         if (supervisorLevel is null)
         {
@@ -149,7 +149,7 @@ public class PasswordResetViewModel : ViewModelBase
             return;
         }
 
-        var targetLevel = await _mySqlAdmin.GetUserLevel(Username);
+        var targetLevel = await _mySql.GetUserLevel(Username);
 
         if (targetLevel is null)
         {
@@ -167,7 +167,7 @@ public class PasswordResetViewModel : ViewModelBase
         }
 
         var sha1Hash = HashPasswordSha1(NewPassword);
-        var success = await _mySqlAdmin.ResetUserPassword(Username, sha1Hash);
+        var success = await _mySql.ResetUserPassword(Username, sha1Hash);
 
         if (success)
             SuccessMessage = $"Password for '{Username}' was reset successfully.";

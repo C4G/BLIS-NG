@@ -1,5 +1,3 @@
-using BLIS_NG.Server;
-
 namespace BLIS_NG.ViewModels;
 
 public class ToolsWindowViewModel : ViewModelBase
@@ -8,8 +6,8 @@ public class ToolsWindowViewModel : ViewModelBase
 
     // Future: public UpdateViewModel UpdateViewModel { get; }
 
-    public ToolsWindowViewModel(MySqlAdmin mySqlAdmin)
+    public ToolsWindowViewModel(PasswordResetViewModel passwordResetViewModel)
     {
-        PasswordResetViewModel = new PasswordResetViewModel(mySqlAdmin);
+        PasswordResetViewModel = passwordResetViewModel;
     }
 }
