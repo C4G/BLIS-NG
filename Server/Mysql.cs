@@ -43,10 +43,9 @@ public class MySql(ILogger<MySql> logger, MySqlIni mySqlIni) : BaseProcess(nameo
     }
 
     /// <summary>
-    /// Checks that a user exists with the given credentials and has a rank >= 2
+    /// Checks that a user exists with the given credentials and has a level
     /// (supervisor or higher).
-    /// TODO: confirm the rank column name in the `user` table with your team
-    /// (e.g. user_type, user_rank, rank — check the BLIS schema).
+    /// This is based off the "level" of the username
     /// </summary>
     public async Task<int?> GetVerifiedUserLevel(string username, string sha1Password)
     {
