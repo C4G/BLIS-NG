@@ -11,6 +11,8 @@ public class HttpdConf : ConfigurationFile
     public readonly string DOCROOT;
     public readonly string PID_FILE;
     public readonly string LOCAL_DIR;
+    public readonly string STORAGE_DIR;
+    public readonly string DATA_DIR;
 
     public HttpdConf() : base(new Uri("avares://BLIS-NG/Assets/Templates/httpd.conf.liquid"))
     {
@@ -22,6 +24,8 @@ public class HttpdConf : ConfigurationFile
 
         PID_FILE = Path.Combine(TMP_DIR, "httpd.pid");
         LOCAL_DIR = Path.Combine(BASE_DIR, "local");
+        STORAGE_DIR = Path.Combine(BASE_DIR, "storage");
+        DATA_DIR = Path.Combine(BASE_DIR, "data");
     }
 
     public override void Write()
@@ -34,7 +38,9 @@ public class HttpdConf : ConfigurationFile
             { "log_dir", LOG_DIR },
             { "server_dir", SERVER_BASE_DIR },
             { "pid_file", PID_FILE },
-            { "local_dir", LOCAL_DIR }
+            { "local_dir", LOCAL_DIR },
+            { "storage_dir", STORAGE_DIR },
+            { "data_dir", DATA_DIR }
         });
     }
 }
