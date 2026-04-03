@@ -8,11 +8,25 @@ namespace BLIS_NG.ViewModels;
 
 public class PasswordResetViewModel : ViewModelBase
 {
-    private readonly MySqlAdmin _mySqlAdmin;
+    // role hierarchy dictionary
+    private static readonly Dictionary<int, int> RolePower = new()
+    {
+        { 0, 1 },  // TECH_RW
+        { 1, 1 },  // TECH_RO
+        { 5, 1 },  // CLERK
+        { 2, 2 },  // ADMIN
+        { 4, 3 },  // COUNTRYDIR
+        { 3, 4 },  // SUPERADMIN
+    };
 
-    public ReactiveCommand<Unit, Unit> ResetPasswordCommand { get; }
+    private readonly MySql _mySql;
+
+    public ReactiveCommand<Unit, Unit> ProceedToVerifyCommand { get; }
+    public ReactiveCommand<Unit, Unit> ConfirmResetCommand { get; }
+    public ReactiveCommand<Unit, Unit> BackCommand { get; }
     public ReactiveCommand<Unit, Unit> CancelCommand { get; }
 
+    // Step 1 — target user
     private string _username = string.Empty;
     public string Username
     {
@@ -34,6 +48,37 @@ public class PasswordResetViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _confirmPassword, value);
     }
 
+    // Step 2 — supervisor credentials
+    private string _supervisorUsername = string.Empty;
+    public string SupervisorUsername
+    {
+        get => _supervisorUsername;
+        set => this.RaiseAndSetIfChanged(ref _supervisorUsername, value);
+    }
+
+    private string _supervisorPassword = string.Empty;
+    public string SupervisorPassword
+    {
+        get => _supervisorPassword;
+        set => this.RaiseAndSetIfChanged(ref _supervisorPassword, value);
+    }
+
+    // Step visibility
+    private int _currentStep = 1;
+    public int CurrentStep
+    {
+        get => _currentStep;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _currentStep, value);
+            this.RaisePropertyChanged(nameof(IsStep1Visible));
+            this.RaisePropertyChanged(nameof(IsStep2Visible));
+        }
+    }
+    public bool IsStep1Visible => CurrentStep == 1;
+    public bool IsStep2Visible => CurrentStep == 2;
+
+    // Feedback
     private string _errorMessage = string.Empty;
     public string ErrorMessage
     {
@@ -44,7 +89,6 @@ public class PasswordResetViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(HasError));
         }
     }
-
     public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
     private string _successMessage = string.Empty;
@@ -57,16 +101,15 @@ public class PasswordResetViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(HasSuccess));
         }
     }
-
     public bool HasSuccess => !string.IsNullOrEmpty(SuccessMessage);
 
-    // Callback so the dialog can close itself (set from the View's code-behind)
-    public Action? CloseDialog { get; set; }
 
-    public PasswordResetViewModel(MySqlAdmin mySqlAdmin)
+    public PasswordResetViewModel(MySql mySql)
     {
-        _mySqlAdmin = mySqlAdmin;
-        ResetPasswordCommand = ReactiveCommand.CreateFromTask(HandleResetAsync);
+        _mySql = mySql;
+        ProceedToVerifyCommand = ReactiveCommand.Create(HandleProceedToVerify);
+        ConfirmResetCommand = ReactiveCommand.CreateFromTask(HandleConfirmResetAsync);
+        BackCommand = ReactiveCommand.Create(HandleBack);
         CancelCommand = ReactiveCommand.Create(HandleCancel);
     }
 
@@ -77,47 +120,78 @@ public class PasswordResetViewModel : ViewModelBase
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
-    private async Task HandleResetAsync()
+    private void HandleProceedToVerify()
     {
-
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
 
-        if (string.IsNullOrWhiteSpace(Username))
+        if (string.IsNullOrWhiteSpace(Username)) { ErrorMessage = "Username is required."; return; }
+        if (string.IsNullOrWhiteSpace(NewPassword)) { ErrorMessage = "New password is required."; return; }
+        if (NewPassword != ConfirmPassword) { ErrorMessage = "Passwords do not match."; return; }
+
+        CurrentStep = 2;
+    }
+
+    private async Task HandleConfirmResetAsync()
+    {
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(SupervisorUsername)) { ErrorMessage = "Supervisor username is required."; return; }
+        if (string.IsNullOrWhiteSpace(SupervisorPassword)) { ErrorMessage = "Supervisor password is required."; return; }
+
+        var supervisorHash = HashPasswordSha1(SupervisorPassword);
+        var supervisorLevel = await _mySql.GetVerifiedUserLevel(SupervisorUsername, supervisorHash);
+
+        if (supervisorLevel is null)
         {
-            ErrorMessage = "Username is required.";
+            ErrorMessage = "Supervisor verification failed. Invalid credentials.";
             return;
         }
-        if (string.IsNullOrWhiteSpace(NewPassword))
+
+        var targetLevel = await _mySql.GetUserLevel(Username);
+
+        if (targetLevel is null)
         {
-            ErrorMessage = "New password is required.";
+            ErrorMessage = $"Could not find user '{Username}'.";
             return;
         }
-        if (NewPassword != ConfirmPassword)
+
+        var supervisorPower = RolePower.GetValueOrDefault(supervisorLevel.Value, 0);
+        var targetPower = RolePower.GetValueOrDefault(targetLevel.Value, 0);
+
+        if (supervisorPower <= targetPower)
         {
-            ErrorMessage = "Passwords do not match.";
+            ErrorMessage = "Supervisor does not have sufficient rank to reset this user's password.";
             return;
         }
 
         var sha1Hash = HashPasswordSha1(NewPassword);
-
-        var success = await _mySqlAdmin.ResetUserPassword(Username, sha1Hash);
+        var success = await _mySql.ResetUserPassword(Username, sha1Hash);
 
         if (success)
-        {
-            SuccessMessage = "Password reset successful!";
-            Username = string.Empty;
-            NewPassword = string.Empty;
-            ConfirmPassword = string.Empty;
-        }
+            SuccessMessage = $"Password for '{Username}' was reset successfully.";
         else
-        {
             ErrorMessage = "Failed to reset password. Please check the username and try again.";
-        }
     }
 
-    private void HandleCancel()
+    private void HandleBack()
     {
-        CloseDialog?.Invoke();
+        ErrorMessage = string.Empty;
+        CurrentStep = 1;
+    }
+
+    private void HandleCancel() => ResetForm();
+
+    public void ResetForm()
+    {
+        Username = string.Empty;
+        NewPassword = string.Empty;
+        ConfirmPassword = string.Empty;
+        SupervisorUsername = string.Empty;
+        SupervisorPassword = string.Empty;
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        CurrentStep = 1;
     }
 }

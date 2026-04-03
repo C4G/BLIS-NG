@@ -16,19 +16,19 @@ namespace BLIS_NG.ViewModels;
 public class ServerControlViewModel : ViewModelBase
 {
     private const string AppVersionNumber = "4.0";
-    public static string AppVersion { get { return $"BLIS for Windows {AppVersionNumber}"; } }
+    public static string AppVersion
+    {
+        get { return $"BLIS for Windows {AppVersionNumber}"; }
+    }
 
     private readonly ILogger<ServerControlViewModel> logger;
     private readonly ILoggerFactory _loggerFactory;
     private readonly IMainServer mainServer;
-
     private readonly IClassicDesktopStyleApplicationLifetime _lifetime;
-
-    private readonly MySqlAdmin _mySqlAdmin;
+    private readonly ToolsWindowViewModel _toolsWindowViewModel;
 
     public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
     public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
-
     public ReactiveCommand<Unit, Unit> OpenPasswordResetCommand { get; }
     public ReactiveCommand<Unit, Unit> SelectZipCommand { get; }
 
@@ -55,13 +55,19 @@ public class ServerControlViewModel : ViewModelBase
 
     public bool ProbablyRunning { get; private set; }
 
-    public ServerControlViewModel(ILogger<ServerControlViewModel> logger, ILoggerFactory loggerFactory, IMainServer mainServer, IClassicDesktopStyleApplicationLifetime lifetime, MySqlAdmin mySqlAdmin)
+    public ServerControlViewModel(
+        ILogger<ServerControlViewModel> logger,
+        ILoggerFactory loggerFactory,
+        IMainServer mainServer,
+        IClassicDesktopStyleApplicationLifetime lifetime,
+        ToolsWindowViewModel toolsWindowViewModel,
+        MySqlAdmin mySqlAdmin)
     {
         this.logger = logger;
         _loggerFactory = loggerFactory;
         this.mainServer = mainServer;
         _lifetime = lifetime;
-        _mySqlAdmin = mySqlAdmin;
+        _toolsWindowViewModel = toolsWindowViewModel;
 
         StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
         StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
@@ -72,10 +78,8 @@ public class ServerControlViewModel : ViewModelBase
     public void HandleStartButtonClick()
     {
         mainServer.Start(HealthcheckAndUpdateStatus);
-
         StartBlisEnabled = false;
         StopBlisEnabled = true;
-
         Thread.Sleep(1000);
         OpenUrl(MainServer.ServerUri);
     }
@@ -83,9 +87,7 @@ public class ServerControlViewModel : ViewModelBase
     public async void HandleStopButtonClick()
     {
         if (StopBlisEnabled)
-        {
             await mainServer.Stop();
-        }
     }
 
     private void HealthcheckAndUpdateStatus(MainServer.ServerStatus serverStatus)
@@ -184,66 +186,14 @@ public class ServerControlViewModel : ViewModelBase
 
     public void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
-        // Shutdown server when closing
         HandleStopButtonClick();
     }
+
     private void HandleOpenPasswordReset()
     {
         if (_lifetime.MainWindow is null) return;
-        System.Diagnostics.Debug.WriteLine($"_mySqlAdmin is null: {_mySqlAdmin is null}");
-        var viewModel = new PasswordResetViewModel(_mySqlAdmin);
-        System.Diagnostics.Debug.WriteLine($"ViewModel created, DataContext will be: {viewModel.GetType().Name}");
-        var dialog = new BLIS_NG.Views.PasswordResetDialog(viewModel);
-        System.Diagnostics.Debug.WriteLine($"Dialog DataContext is: {dialog.DataContext?.GetType().Name ?? "NULL"}");
-        dialog.ShowDialog(_lifetime.MainWindow);
-    }
-
-    private void CreateAutomatedDatabaseBackup()
-    {
-        // 1. Resolve the Base Directory and define paths
-        string baseDir = ConfigurationFile.ResolveBaseDirectory();
-        string dbSource = Path.Combine(baseDir, "dbdir");
-
-        // 2. Create the backup path: [BaseDir]/backups/DB_Backup_[Timestamp]
-        string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-        string backupRoot = Path.Combine(baseDir, "backups");
-        string fullDestination = Path.Combine(backupRoot, $"DB_Backup_{timestamp}");
-
-        try
-        {
-            if (Directory.Exists(dbSource))
-            {
-                logger.LogInformation("Creating automated backup at: {Path}", fullDestination);
-
-                // Ensure the 'backups' root folder exists
-                Directory.CreateDirectory(backupRoot);
-
-                // Perform the recursive copy
-                CopyDirectoryRecursive(dbSource, fullDestination);
-
-                logger.LogInformation("Automated database backup completed.");
-            }
-            else
-            {
-                logger.LogWarning("Database source not found at {Path}. Backup aborted.", dbSource);
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Automated backup failed.");
-        }
-    }
-
-    private void CopyDirectoryRecursive(string source, string target)
-    {
-        Directory.CreateDirectory(target);
-        foreach (string file in Directory.GetFiles(source))
-        {
-            File.Copy(file, Path.Combine(target, Path.GetFileName(file)), true);
-        }
-        foreach (string dir in Directory.GetDirectories(source))
-        {
-            CopyDirectoryRecursive(dir, Path.Combine(target, Path.GetFileName(dir)));
-        }
+        _toolsWindowViewModel.PasswordResetViewModel.ResetForm();
+        var toolsWindow = new BLIS_NG.Views.ToolsWindow(_toolsWindowViewModel);
+        toolsWindow.ShowDialog(_lifetime.MainWindow);
     }
 }

@@ -1,0 +1,106 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:BLIS_NG.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="520"
+        x:CompileBindings="True"
+        x:DataType="vm:ToolsWindowViewModel"
+        x:Class="BLIS_NG.Views.ToolsWindow"
+        Title="BLIS Tools"
+        Width="480"
+        Height="520"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner">
+
+  <DockPanel>
+
+    <Border DockPanel.Dock="Top" Background="#005A9C" Padding="16 12">
+      <TextBlock Foreground="White" FontSize="16" FontWeight="SemiBold">BLIS Tools</TextBlock>
+    </Border>
+
+    <TabControl>
+
+      <!-- ── Password Reset Tab ── -->
+      <TabItem Header="Password Reset">
+        <ScrollViewer>
+          <StackPanel Margin="20" Spacing="12"
+                      DataContext="{Binding PasswordResetViewModel}">
+
+            <TextBlock FontSize="16" FontWeight="Bold">Reset User Password</TextBlock>
+
+            <!-- Step 1: Target user details -->
+            <StackPanel Spacing="10" IsVisible="{Binding IsStep1Visible}">
+              <StackPanel Spacing="4">
+                <TextBlock>Username to Reset</TextBlock>
+                <TextBox Text="{Binding Username}" Watermark="Enter username"/>
+              </StackPanel>
+              <StackPanel Spacing="4">
+                <TextBlock>New Password</TextBlock>
+                <TextBox Text="{Binding NewPassword}" PasswordChar="●"
+                         Watermark="Enter new password"/>
+              </StackPanel>
+              <StackPanel Spacing="4">
+                <TextBlock>Confirm Password</TextBlock>
+                <TextBox Text="{Binding ConfirmPassword}" PasswordChar="●"
+                         Watermark="Confirm new password"/>
+              </StackPanel>
+            </StackPanel>
+
+            <!-- Step 2: Supervisor verification -->
+            <StackPanel Spacing="10" IsVisible="{Binding IsStep2Visible}">
+              <Border Background="#FFF8E1" CornerRadius="4" Padding="10">
+                <TextBlock TextWrapping="Wrap" Foreground="#7B5800" FontStyle="Italic">
+                  A higher-ranked user must authorize this password reset.
+                </TextBlock>
+              </Border>
+              <StackPanel Spacing="4">
+                <TextBlock>Supervisor Username</TextBlock>
+                <TextBox Text="{Binding SupervisorUsername}"
+                         Watermark="Enter supervisor username"/>
+              </StackPanel>
+              <StackPanel Spacing="4">
+                <TextBlock>Supervisor Password</TextBlock>
+                <TextBox Text="{Binding SupervisorPassword}" PasswordChar="●"
+                         Watermark="Enter supervisor password"/>
+              </StackPanel>
+            </StackPanel>
+
+            <!-- Feedback -->
+            <TextBlock Foreground="Red" Text="{Binding ErrorMessage}"
+                       IsVisible="{Binding HasError}" TextWrapping="Wrap"/>
+            <TextBlock Foreground="Green" Text="{Binding SuccessMessage}"
+                       IsVisible="{Binding HasSuccess}" TextWrapping="Wrap"/>
+
+            <!-- Action buttons -->
+            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+              <Button Width="120" Command="{Binding ProceedToVerifyCommand}"
+                      IsVisible="{Binding IsStep1Visible}">Next →</Button>
+              <Button Width="80" Command="{Binding BackCommand}"
+                      IsVisible="{Binding IsStep2Visible}">← Back</Button>
+              <Button Width="130" Command="{Binding ConfirmResetCommand}"
+                      IsVisible="{Binding IsStep2Visible}">Confirm Reset</Button>
+              <Button Width="100" Command="{Binding CancelCommand}">Reset Form</Button>
+            </StackPanel>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ── Updates Tab (placeholder) ── -->
+      <!--TabItem Header="Updates">
+        <StackPanel Margin="20" Spacing="12"
+                    VerticalAlignment="Center" HorizontalAlignment="Center">
+          <TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center">
+            Updates
+          </TextBlock>
+          <TextBlock Foreground="#888888" HorizontalAlignment="Center"
+                     TextWrapping="Wrap" TextAlignment="Center">
+            Update functionality will appear here in a future release.
+          </TextBlock>
+        </StackPanel>
+      </TabItem-->
+
+    </TabControl>
+  </DockPanel>
+</Window>
