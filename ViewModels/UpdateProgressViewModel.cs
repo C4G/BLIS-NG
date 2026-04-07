@@ -50,37 +50,52 @@ public class UpdateProgressViewModel : ViewModelBase
 
         try
         {
-            // Stage 1: Database backup
-            UpdateStage(1, "Backing up database...");
+            // Stage 1: Validate ZIP — unpack and check contents before touching servers or data
+            UpdateStage(1, "Validating update package...");
             _logger.LogInformation("Starting update from ZIP: {ZipPath}", zipPath);
-            CreateAutomatedDatabaseBackup(baseDir);
-
-            // Stage 2: Stop servers
-            UpdateStage(2, "Stopping servers...");
-            _logger.LogInformation("Stopping servers before update.");
-            await _mainServer.Stop();
-            _logger.LogInformation("Servers stopped.");
-
-            // Stage 3: Unpack ZIP
-            UpdateStage(3, "Unpacking ZIP file...");
             string stagingPath = Path.Combine(baseDir, StagingDir);
             string effectiveStagingPath = "";
             await Task.Run(() => effectiveStagingPath = UnpackZip(zipPath, stagingPath));
 
-            // Read version.json from staging to get NEW_VERSION
+            // Validate the ZIP contains the required files
             var versionFile = VersionFile.Load(effectiveStagingPath);
-            if (versionFile == null || string.IsNullOrWhiteSpace(versionFile.Version))
+            string? newExeInZip = FindFileRecursive(effectiveStagingPath, ExeName);
+            string stagingServerPath = Path.Combine(effectiveStagingPath, ServerDir);
+
+            if (versionFile == null || string.IsNullOrWhiteSpace(versionFile.Version)
+                || newExeInZip == null
+                || !Directory.Exists(stagingServerPath))
             {
-                _logger.LogError("version.json not found or missing version field in {StagingPath}.", effectiveStagingPath);
-                throw new FileNotFoundException("version.json was not found or is invalid in the update package.");
+                _logger.LogError("Update ZIP is missing required files. version.json={HasVersion}, {ExeName}={HasExe}, server/={HasServer}",
+                    versionFile?.Version != null, newExeInZip != null, Directory.Exists(stagingServerPath));
+                ShowError("Update Failed: Incompatible Update ZIP File");
+                return;
             }
+
             string newVersion = versionFile.Version;
             _logger.LogInformation("Update package version: {NewVersion}", newVersion);
 
-            // Read current state
+            // Read current state and check for same-version update
             var state = StateFile.Load(baseDir);
             string currentVersion = state.ActiveVersion;
             _logger.LogInformation("Current active version: {CurrentVersion}", currentVersion);
+
+            if (string.Equals(currentVersion, newVersion, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogWarning("Update version {NewVersion} matches current active version. Aborting.", newVersion);
+                ShowError("Update Failed: Update Version is Same as Current Version");
+                return;
+            }
+
+            // Stage 2: Database backup
+            UpdateStage(2, "Backing up database...");
+            CreateAutomatedDatabaseBackup(baseDir);
+
+            // Stage 3: Stop servers
+            UpdateStage(3, "Stopping servers...");
+            _logger.LogInformation("Stopping servers before update.");
+            await _mainServer.Stop();
+            _logger.LogInformation("Servers stopped.");
 
             // Stage 4: Backup current server
             UpdateStage(4, "Backing up current server...");
@@ -101,17 +116,9 @@ public class UpdateProgressViewModel : ViewModelBase
 
             // Stage 5: Install new server
             UpdateStage(5, "Installing new server...");
-            string stagingServerPath = Path.Combine(effectiveStagingPath, ServerDir);
-            if (Directory.Exists(stagingServerPath))
-            {
-                _logger.LogInformation("Copying new server from {Source} to {Destination}.", stagingServerPath, serverPath);
-                CopyDirectoryRecursive(stagingServerPath, serverPath);
-                _logger.LogInformation("New server installed.");
-            }
-            else
-            {
-                _logger.LogWarning("No server directory found in update package at {Path}.", stagingServerPath);
-            }
+            _logger.LogInformation("Copying new server from {Source} to {Destination}.", stagingServerPath, serverPath);
+            CopyDirectoryRecursive(stagingServerPath, serverPath);
+            _logger.LogInformation("New server installed.");
 
             // Stage 6: Install release files
             UpdateStage(6, "Installing release files...");
@@ -146,13 +153,7 @@ public class UpdateProgressViewModel : ViewModelBase
             UpdateStage(8, "Replacing executable...");
             string currentExePath = Path.Combine(baseDir, ExeName);
             string oldExePath = Path.Combine(baseDir, OldExeName);
-            string? newExePath = FindFileRecursive(effectiveStagingPath, ExeName);
-            if (newExePath == null)
-            {
-                _logger.LogError("{ExeName} not found in staging at {StagingPath}.", ExeName, effectiveStagingPath);
-                throw new FileNotFoundException($"{ExeName} was not found in the update package.");
-            }
-            ReplaceExecutable(currentExePath, oldExePath, newExePath);
+            ReplaceExecutable(currentExePath, oldExePath, newExeInZip);
 
             // Stage 9: Launch new application
             UpdateStage(9, "Launching updated application...");
@@ -171,12 +172,17 @@ public class UpdateProgressViewModel : ViewModelBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Update failed.");
-            StatusMessage = $"Update Failed: {ex.Message}";
-            StatusColor = Brushes.Red;
-
-            await Task.Delay(3000);
-            onComplete();
+            ShowError($"Update Failed: {ex.Message}");
         }
+    }
+
+    private void ShowError(string message)
+    {
+        CurrentStageText = "";
+        ProgressText = "";
+        StatusMessage = message;
+        StatusColor = Brushes.Red;
+        Percent = 0;
     }
 
     /// <summary>
