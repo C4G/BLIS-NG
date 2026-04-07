@@ -18,9 +18,9 @@ public class MainWindowViewModel : ViewModelBase
         ApplicationLifetime = lifetime;
         ServerControlViewModel = serverControlViewModel;
 
-        // Start BLIS on app start
-        ServerControlViewModel.HandleStartButtonClick();
-        WindowState = WindowState.Minimized;
+        // // Start BLIS on app start
+        // ServerControlViewModel.HandleStartButtonClick();
+        // WindowState = WindowState.Minimized;
     }
 
     public bool Shutdown()
