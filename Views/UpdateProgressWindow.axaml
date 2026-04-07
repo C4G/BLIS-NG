@@ -13,9 +13,6 @@
                        FontWeight="Bold" 
                        HorizontalAlignment="Center"/>
             
-            <TextBlock Text="{Binding ProgressText}" 
-                       HorizontalAlignment="Center"/>
-            
             <ProgressBar Value="{Binding Percent}" 
                          Minimum="0" 
                          Maximum="100" 

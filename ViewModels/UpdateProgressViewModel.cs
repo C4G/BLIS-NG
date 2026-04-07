@@ -25,18 +25,16 @@ public class UpdateProgressViewModel : ViewModelBase
     private readonly IMainServer _mainServer;
 
     private string _currentStageText = "Initializing...";
-    private string _progressText = "0 of 9";
     private string _statusMessage = "Update In Progress";
     private int _percent = 0;
     private IBrush _statusColor = Brushes.Black;
 
     public string CurrentStageText { get => _currentStageText; set => this.RaiseAndSetIfChanged(ref _currentStageText, value); }
-    public string ProgressText { get => _progressText; set => this.RaiseAndSetIfChanged(ref _progressText, value); }
     public string StatusMessage { get => _statusMessage; set => this.RaiseAndSetIfChanged(ref _statusMessage, value); }
     public int Percent { get => _percent; set => this.RaiseAndSetIfChanged(ref _percent, value); }
     public IBrush StatusColor { get => _statusColor; set => this.RaiseAndSetIfChanged(ref _statusColor, value); }
 
-    private const int TotalStages = 9;
+    private const int TotalStages = 10;
 
     public UpdateProgressViewModel(ILogger<UpdateProgressViewModel> logger, IMainServer mainServer)
     {
@@ -50,14 +48,15 @@ public class UpdateProgressViewModel : ViewModelBase
 
         try
         {
-            // Stage 1: Validate ZIP — unpack and check contents before touching servers or data
-            UpdateStage(1, "Validating update package...");
+            // Stage 1: Unpack ZIP
+            UpdateStage(1, "Unpacking ZIP file...");
             _logger.LogInformation("Starting update from ZIP: {ZipPath}", zipPath);
             string stagingPath = Path.Combine(baseDir, StagingDir);
             string effectiveStagingPath = "";
             await Task.Run(() => effectiveStagingPath = UnpackZip(zipPath, stagingPath));
 
-            // Validate the ZIP contains the required files
+            // Stage 2: Validate contents before touching servers or data
+            UpdateStage(2, "Validating update package...");
             var versionFile = VersionFile.Load(effectiveStagingPath);
             string? newExeInZip = FindFileRecursive(effectiveStagingPath, ExeName);
             string stagingServerPath = Path.Combine(effectiveStagingPath, ServerDir);
@@ -87,18 +86,18 @@ public class UpdateProgressViewModel : ViewModelBase
                 return;
             }
 
-            // Stage 2: Database backup
-            UpdateStage(2, "Backing up database...");
+            // Stage 3: Database backup
+            UpdateStage(3, "Backing up database...");
             CreateAutomatedDatabaseBackup(baseDir);
 
-            // Stage 3: Stop servers
-            UpdateStage(3, "Stopping servers...");
+            // Stage 4: Stop servers
+            UpdateStage(4, "Stopping servers...");
             _logger.LogInformation("Stopping servers before update.");
             await _mainServer.Stop();
             _logger.LogInformation("Servers stopped.");
 
-            // Stage 4: Backup current server
-            UpdateStage(4, "Backing up current server...");
+            // Stage 5: Backup current server
+            UpdateStage(5, "Backing up current server...");
             string serverPath = Path.Combine(baseDir, ServerDir);
             if (Directory.Exists(serverPath))
             {
@@ -114,14 +113,14 @@ public class UpdateProgressViewModel : ViewModelBase
                 _logger.LogWarning("No existing server directory found at {ServerPath}. Skipping server backup.", serverPath);
             }
 
-            // Stage 5: Install new server
-            UpdateStage(5, "Installing new server...");
+            // Stage 6: Install new server
+            UpdateStage(6, "Installing new server...");
             _logger.LogInformation("Copying new server from {Source} to {Destination}.", stagingServerPath, serverPath);
             CopyDirectoryRecursive(stagingServerPath, serverPath);
             _logger.LogInformation("New server installed.");
 
-            // Stage 6: Install release files
-            UpdateStage(6, "Installing release files...");
+            // Stage 7: Install release files
+            UpdateStage(7, "Installing release files...");
             string releasePath = Path.Combine(baseDir, ReleasesDir, newVersion);
             _logger.LogInformation("Copying release files to {ReleasePath}.", releasePath);
             Directory.CreateDirectory(releasePath);
@@ -142,21 +141,21 @@ public class UpdateProgressViewModel : ViewModelBase
             }
             _logger.LogInformation("Release files installed.");
 
-            // Stage 7: Update configuration
-            UpdateStage(7, "Updating configuration...");
+            // Stage 8: Update configuration
+            UpdateStage(8, "Updating configuration...");
             state.PreviousVersion = currentVersion;
             state.ActiveVersion = newVersion;
             state.Save(baseDir);
             _logger.LogInformation("state.json updated: active_version={NewVersion}, previous_version={CurrentVersion}", newVersion, currentVersion);
 
-            // Stage 8: Replace executable
-            UpdateStage(8, "Replacing executable...");
+            // Stage 9: Replace executable
+            UpdateStage(9, "Replacing executable...");
             string currentExePath = Path.Combine(baseDir, ExeName);
             string oldExePath = Path.Combine(baseDir, OldExeName);
             ReplaceExecutable(currentExePath, oldExePath, newExeInZip);
 
-            // Stage 9: Launch new application
-            UpdateStage(9, "Launching updated application...");
+            // Stage 10: Launch new application
+            UpdateStage(10, "Launching updated application...");
             LaunchNewExecutable(currentExePath, baseDir);
 
             Percent = 100;
@@ -179,7 +178,6 @@ public class UpdateProgressViewModel : ViewModelBase
     private void ShowError(string message)
     {
         CurrentStageText = "";
-        ProgressText = "";
         StatusMessage = message;
         StatusColor = Brushes.Red;
         Percent = 0;
@@ -252,7 +250,6 @@ public class UpdateProgressViewModel : ViewModelBase
     private void UpdateStage(int stage, string text)
     {
         CurrentStageText = $"Step {stage}/{TotalStages}: {text}";
-        ProgressText = $"{stage} of {TotalStages}";
         Percent = (int)((stage - 1) / (double)TotalStages * 100);
     }
 
