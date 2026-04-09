@@ -1,10 +1,10 @@
 <Application xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="using:BLIS_NG"
-             RequestedThemeVariant="Light"
-             x:Class="BLIS_NG.App">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:BLIS_NG"
+    RequestedThemeVariant="Light"
+    x:Class="BLIS_NG.App">
 
     <Application.Styles>
-        <FluentTheme/>
+        <FluentTheme />
     </Application.Styles>
 </Application>
