@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:BLIS_NG.ViewModels"
+        xmlns:lang="using:BLIS_NG.Lang"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="360"
@@ -35,7 +36,7 @@
             Grid.Column="0"
             Grid.ColumnSpan="5"
         >
-            Basic Lab Information System (BLIS)
+            <Run Text="{x:Static lang:Resources.App_Title}" />
         </TextBlock>
 
         <TextBlock 
@@ -57,8 +58,9 @@
             Grid.Column="0"
             Grid.ColumnSpan="5"
         >
-            A Joint Initiative of<LineBreak/>
-            C4G at Georgia Tech, the CDC, and participating countries.
+            <Run Text="{x:Static lang:Resources.App_Tagline_Line1}" />
+            <LineBreak/>
+            <Run Text="{x:Static lang:Resources.App_Tagline_Line2}" />
         </TextBlock>
 
         
@@ -70,7 +72,7 @@
             Grid.Row="3"
             Grid.ColumnSpan="5"
         >
-            C4G BLIS has been licensed under the GNU General Public License version 3. For more information, visit blis.cc.gatech.edu.
+            <Run Text="{x:Static lang:Resources.App_LicenseNotice}" />
         </TextBlock>
 
         <Button 
@@ -93,8 +95,16 @@
             Grid.ColumnSpan="5"
         >
             <TextBlock Width="240" VerticalAlignment="Center" Text="{Binding Status}"></TextBlock>
-            <Button Width="160" Command="{Binding StartServerCommand}" IsEnabled="{Binding StartBlisEnabled}">Start BLIS</Button>
-            <Button Width="160" Command="{Binding StopServerCommand}" IsEnabled="{Binding StopBlisEnabled}">Stop BLIS</Button>
-    </StackPanel>
+            <Button Width="160"
+            Command="{Binding StartServerCommand}"
+            IsEnabled="{Binding StartBlisEnabled}"
+            Content="{x:Static lang:Resources.Button_StartBlis}" />
+
+            <Button Width="160"
+            Command="{Binding StopServerCommand}"
+            IsEnabled="{Binding StopBlisEnabled}"
+            Content="{x:Static lang:Resources.Button_StopBlis}" />
+
+        </StackPanel>
     </Grid>
 </Window>
