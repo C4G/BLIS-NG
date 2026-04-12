@@ -1,6 +1,7 @@
 using System.Reactive;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using ReactiveUI;
 using BLIS_NG.Server;
 
@@ -27,7 +28,15 @@ public class PasswordResetViewModel : ViewModelBase
     public string NewPassword
     {
         get => _newPassword;
-        set => this.RaiseAndSetIfChanged(ref _newPassword, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _newPassword, value);
+            this.RaisePropertyChanged(nameof(PasswordStrength));
+            this.RaisePropertyChanged(nameof(PasswordStrengthLabel));
+            this.RaisePropertyChanged(nameof(PasswordStrengthColor));
+            this.RaisePropertyChanged(nameof(PasswordStrengthWidth));
+            this.RaisePropertyChanged(nameof(PasswordRequirementsMet));
+        }
     }
 
     private string _confirmPassword = string.Empty;
@@ -67,7 +76,65 @@ public class PasswordResetViewModel : ViewModelBase
     public bool IsStep1Visible => CurrentStep == 1;
     public bool IsStep2Visible => CurrentStep == 2;
 
-    // Feedback
+    // ── Password strength ──────────────────────────────────────────────────
+
+    // Returns 0–4 based on how many criteria are met
+    public int PasswordStrength
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(NewPassword)) return 0;
+            int score = 0;
+            if (NewPassword.Length >= 20)                            score++;
+            if (Regex.IsMatch(NewPassword, "[a-z]"))                 score++;
+            if (Regex.IsMatch(NewPassword, "[A-Z]"))                 score++;
+            if (Regex.IsMatch(NewPassword, "[0-9]"))                 score++;
+            if (Regex.IsMatch(NewPassword, "[^a-zA-Z0-9]"))          score++;
+            return score;
+        }
+    }
+
+    public string PasswordStrengthLabel => PasswordStrength switch
+    {
+        0 => "",
+        1 => "Very Weak",
+        2 => "Weak",
+        3 => "Fair",
+        4 => "Strong",
+        5 => "Very Strong",
+        _ => ""
+    };
+
+    public string PasswordStrengthColor => PasswordStrength switch
+    {
+        1 => "#D32F2F",
+        2 => "#F57C00",
+        3 => "#FBC02D",
+        4 => "#388E3C",
+        5 => "#1B5E20",
+        _ => "Transparent"
+    };
+
+    // Width as a fraction of 300px bar (60px per point)
+    public double PasswordStrengthWidth => PasswordStrength * 60.0;
+
+    // True when minimum NIST-aligned requirements are met (length + 2 classes)
+    public bool PasswordRequirementsMet
+    {
+        get
+        {
+            if (NewPassword.Length < 20) return false;
+            int classes = 0;
+            if (Regex.IsMatch(NewPassword, "[a-z]"))        classes++;
+            if (Regex.IsMatch(NewPassword, "[A-Z]"))        classes++;
+            if (Regex.IsMatch(NewPassword, "[0-9]"))        classes++;
+            if (Regex.IsMatch(NewPassword, "[^a-zA-Z0-9]")) classes++;
+            return classes >= 2;
+        }
+    }
+
+    // ── Feedback ───────────────────────────────────────────────────────────
+
     private string _errorMessage = string.Empty;
     public string ErrorMessage
     {
@@ -94,6 +161,8 @@ public class PasswordResetViewModel : ViewModelBase
 
     public Action? CloseDialog { get; set; }
 
+    // ── Constructor ────────────────────────────────────────────────────────
+
     public PasswordResetViewModel(MySqlAdmin mySqlAdmin)
     {
         _mySqlAdmin = mySqlAdmin;
@@ -103,6 +172,8 @@ public class PasswordResetViewModel : ViewModelBase
         CancelCommand          = ReactiveCommand.Create(HandleCancel);
     }
 
+    // ── Helpers ────────────────────────────────────────────────────────────
+
     private static string HashPasswordSha1(string password)
     {
         var salted = password + "This comment should suffice as salt.";
@@ -110,14 +181,42 @@ public class PasswordResetViewModel : ViewModelBase
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
+    private string? ValidatePassword(string password)
+    {
+        if (password.Length < 20)
+            return "Password must be at least 20 characters.";
+
+        int classes = 0;
+        if (Regex.IsMatch(password, "[a-z]"))        classes++;
+        if (Regex.IsMatch(password, "[A-Z]"))        classes++;
+        if (Regex.IsMatch(password, "[0-9]"))        classes++;
+        if (Regex.IsMatch(password, "[^a-zA-Z0-9]")) classes++;
+
+        if (classes < 2)
+            return "Password must include at least 2 character types (uppercase, lowercase, numbers, symbols).";
+
+        return null; // valid
+    }
+
+    // ── Handlers ───────────────────────────────────────────────────────────
+
     private void HandleProceedToVerify()
     {
         ErrorMessage   = string.Empty;
         SuccessMessage = string.Empty;
 
-        if (string.IsNullOrWhiteSpace(Username))    { ErrorMessage = "Username is required.";     return; }
-        if (string.IsNullOrWhiteSpace(NewPassword)) { ErrorMessage = "New password is required."; return; }
-        if (NewPassword != ConfirmPassword)          { ErrorMessage = "Passwords do not match.";   return; }
+        if (string.IsNullOrWhiteSpace(Username))
+            { ErrorMessage = "Username is required."; return; }
+
+        if (string.IsNullOrWhiteSpace(NewPassword))
+            { ErrorMessage = "New password is required."; return; }
+
+        var passwordError = ValidatePassword(NewPassword);
+        if (passwordError is not null)
+            { ErrorMessage = passwordError; return; }
+
+        if (NewPassword != ConfirmPassword)
+            { ErrorMessage = "Passwords do not match."; return; }
 
         CurrentStep = 2;
     }
@@ -127,8 +226,10 @@ public class PasswordResetViewModel : ViewModelBase
         ErrorMessage   = string.Empty;
         SuccessMessage = string.Empty;
 
-        if (string.IsNullOrWhiteSpace(SupervisorUsername)) { ErrorMessage = "Supervisor username is required."; return; }
-        if (string.IsNullOrWhiteSpace(SupervisorPassword)) { ErrorMessage = "Supervisor password is required."; return; }
+        if (string.IsNullOrWhiteSpace(SupervisorUsername))
+            { ErrorMessage = "Supervisor username is required."; return; }
+        if (string.IsNullOrWhiteSpace(SupervisorPassword))
+            { ErrorMessage = "Supervisor password is required."; return; }
 
         var supervisorHash = HashPasswordSha1(SupervisorPassword);
         var verified = await _mySqlAdmin.VerifyHigherRankedUser(SupervisorUsername, supervisorHash);
