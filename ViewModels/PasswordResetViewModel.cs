@@ -9,7 +9,18 @@ namespace BLIS_NG.ViewModels;
 
 public class PasswordResetViewModel : ViewModelBase
 {
-    private readonly MySqlAdmin _mySqlAdmin;
+    // role hierarchy dictionary
+    private static readonly Dictionary<int, int> RolePower = new()
+    {
+        { 0, 1 },  // TECH_RW
+        { 1, 1 },  // TECH_RO
+        { 5, 1 },  // CLERK
+        { 2, 2 },  // ADMIN
+        { 4, 3 },  // COUNTRYDIR
+        { 3, 4 },  // SUPERADMIN
+    };
+
+    private readonly MySql _mySql;
 
     public ReactiveCommand<Unit, Unit> ProceedToVerifyCommand { get; }
     public ReactiveCommand<Unit, Unit> ConfirmResetCommand { get; }
@@ -85,11 +96,11 @@ public class PasswordResetViewModel : ViewModelBase
         {
             if (string.IsNullOrEmpty(NewPassword)) return 0;
             int score = 0;
-            if (NewPassword.Length >= 20)                            score++;
-            if (Regex.IsMatch(NewPassword, "[a-z]"))                 score++;
-            if (Regex.IsMatch(NewPassword, "[A-Z]"))                 score++;
-            if (Regex.IsMatch(NewPassword, "[0-9]"))                 score++;
-            if (Regex.IsMatch(NewPassword, "[^a-zA-Z0-9]"))          score++;
+            if (NewPassword.Length >= 20) score++;
+            if (Regex.IsMatch(NewPassword, "[a-z]")) score++;
+            if (Regex.IsMatch(NewPassword, "[A-Z]")) score++;
+            if (Regex.IsMatch(NewPassword, "[0-9]")) score++;
+            if (Regex.IsMatch(NewPassword, "[^a-zA-Z0-9]")) score++;
             return score;
         }
     }
@@ -125,9 +136,9 @@ public class PasswordResetViewModel : ViewModelBase
         {
             if (NewPassword.Length < 20) return false;
             int classes = 0;
-            if (Regex.IsMatch(NewPassword, "[a-z]"))        classes++;
-            if (Regex.IsMatch(NewPassword, "[A-Z]"))        classes++;
-            if (Regex.IsMatch(NewPassword, "[0-9]"))        classes++;
+            if (Regex.IsMatch(NewPassword, "[a-z]")) classes++;
+            if (Regex.IsMatch(NewPassword, "[A-Z]")) classes++;
+            if (Regex.IsMatch(NewPassword, "[0-9]")) classes++;
             if (Regex.IsMatch(NewPassword, "[^a-zA-Z0-9]")) classes++;
             return classes >= 2;
         }
@@ -163,13 +174,13 @@ public class PasswordResetViewModel : ViewModelBase
 
     // ── Constructor ────────────────────────────────────────────────────────
 
-    public PasswordResetViewModel(MySqlAdmin mySqlAdmin)
+    public PasswordResetViewModel(MySql mySql)
     {
-        _mySqlAdmin = mySqlAdmin;
+        _mySql = mySql;
         ProceedToVerifyCommand = ReactiveCommand.Create(HandleProceedToVerify);
-        ConfirmResetCommand    = ReactiveCommand.CreateFromTask(HandleConfirmResetAsync);
-        BackCommand            = ReactiveCommand.Create(HandleBack);
-        CancelCommand          = ReactiveCommand.Create(HandleCancel);
+        ConfirmResetCommand = ReactiveCommand.CreateFromTask(HandleConfirmResetAsync);
+        BackCommand = ReactiveCommand.Create(HandleBack);
+        CancelCommand = ReactiveCommand.Create(HandleCancel);
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────
@@ -177,7 +188,7 @@ public class PasswordResetViewModel : ViewModelBase
     private static string HashPasswordSha1(string password)
     {
         var salted = password + "This comment should suffice as salt.";
-        var bytes  = SHA1.HashData(Encoding.UTF8.GetBytes(salted));
+        var bytes = SHA1.HashData(Encoding.UTF8.GetBytes(salted));
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
@@ -187,9 +198,9 @@ public class PasswordResetViewModel : ViewModelBase
             return "Password must be at least 20 characters.";
 
         int classes = 0;
-        if (Regex.IsMatch(password, "[a-z]"))        classes++;
-        if (Regex.IsMatch(password, "[A-Z]"))        classes++;
-        if (Regex.IsMatch(password, "[0-9]"))        classes++;
+        if (Regex.IsMatch(password, "[a-z]")) classes++;
+        if (Regex.IsMatch(password, "[A-Z]")) classes++;
+        if (Regex.IsMatch(password, "[0-9]")) classes++;
         if (Regex.IsMatch(password, "[^a-zA-Z0-9]")) classes++;
 
         if (classes < 2)
@@ -202,46 +213,63 @@ public class PasswordResetViewModel : ViewModelBase
 
     private void HandleProceedToVerify()
     {
-        ErrorMessage   = string.Empty;
+        ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
 
         if (string.IsNullOrWhiteSpace(Username))
-            { ErrorMessage = "Username is required."; return; }
+        { ErrorMessage = "Username is required."; return; }
 
         if (string.IsNullOrWhiteSpace(NewPassword))
-            { ErrorMessage = "New password is required."; return; }
+        { ErrorMessage = "New password is required."; return; }
 
         var passwordError = ValidatePassword(NewPassword);
         if (passwordError is not null)
-            { ErrorMessage = passwordError; return; }
+        { ErrorMessage = passwordError; return; }
 
         if (NewPassword != ConfirmPassword)
-            { ErrorMessage = "Passwords do not match."; return; }
+        { ErrorMessage = "Passwords do not match."; return; }
 
         CurrentStep = 2;
     }
 
     private async Task HandleConfirmResetAsync()
     {
-        ErrorMessage   = string.Empty;
+        ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
 
         if (string.IsNullOrWhiteSpace(SupervisorUsername))
-            { ErrorMessage = "Supervisor username is required."; return; }
+        { ErrorMessage = "Supervisor username is required."; return; }
         if (string.IsNullOrWhiteSpace(SupervisorPassword))
-            { ErrorMessage = "Supervisor password is required."; return; }
+        { ErrorMessage = "Supervisor password is required."; return; }
 
         var supervisorHash = HashPasswordSha1(SupervisorPassword);
-        var verified = await _mySqlAdmin.VerifyHigherRankedUser(SupervisorUsername, supervisorHash);
+        var supervisorLevel = await _mySql.GetVerifiedUserLevel(SupervisorUsername, supervisorHash);
 
-        if (!verified)
+        if (supervisorLevel is null)
         {
-            ErrorMessage = "Supervisor verification failed. Invalid credentials or insufficient rank.";
+            ErrorMessage = "Supervisor verification failed. Invalid credentials.";
+            return;
+        }
+
+        var targetLevel = await _mySql.GetUserLevel(Username);
+
+        if (targetLevel is null)
+        {
+            ErrorMessage = $"Could not find user '{Username}'.";
+            return;
+        }
+
+        var supervisorPower = RolePower.GetValueOrDefault(supervisorLevel.Value, 0);
+        var targetPower = RolePower.GetValueOrDefault(targetLevel.Value, 0);
+
+        if (supervisorPower <= targetPower)
+        {
+            ErrorMessage = "Supervisor does not have sufficient rank to reset this user's password.";
             return;
         }
 
         var sha1Hash = HashPasswordSha1(NewPassword);
-        var success  = await _mySqlAdmin.ResetUserPassword(Username, sha1Hash);
+        var success = await _mySql.ResetUserPassword(Username, sha1Hash);
 
         if (success)
             SuccessMessage = $"Password for '{Username}' was reset successfully.";
@@ -252,20 +280,20 @@ public class PasswordResetViewModel : ViewModelBase
     private void HandleBack()
     {
         ErrorMessage = string.Empty;
-        CurrentStep  = 1;
+        CurrentStep = 1;
     }
 
-    private void HandleCancel() => CloseDialog?.Invoke();
+    private void HandleCancel() => ResetForm();
 
     public void ResetForm()
     {
-        Username           = string.Empty;
-        NewPassword        = string.Empty;
-        ConfirmPassword    = string.Empty;
+        Username = string.Empty;
+        NewPassword = string.Empty;
+        ConfirmPassword = string.Empty;
         SupervisorUsername = string.Empty;
         SupervisorPassword = string.Empty;
-        ErrorMessage       = string.Empty;
-        SuccessMessage     = string.Empty;
-        CurrentStep        = 1;
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        CurrentStep = 1;
     }
 }

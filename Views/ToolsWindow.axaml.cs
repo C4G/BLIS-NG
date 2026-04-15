@@ -14,7 +14,5 @@ public partial class ToolsWindow : Window
     {
         DataContext = vm;
         InitializeComponent();
-        // "Reset Form" clears fields rather than closing the window
-        vm.PasswordResetViewModel.CloseDialog = () => vm.PasswordResetViewModel.ResetForm();
     }
 }

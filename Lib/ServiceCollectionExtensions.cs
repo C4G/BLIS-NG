@@ -17,6 +17,7 @@ public static class ServiceCollectionExtensions
 
       // Server & utility processes
       .AddSingleton<MySqlAdmin>()
+      .AddSingleton<MySql>()
       .AddSingleton<MySqlUpgrade>()
       .AddSingleton<MySqlServer>()
       .AddSingleton<Apache2Server>()
@@ -26,6 +27,8 @@ public static class ServiceCollectionExtensions
       .AddSingleton<IMainServer, MainServer>()
 
       // ViewModels
+      .AddSingleton<PasswordResetViewModel>()
+      .AddSingleton<ToolsWindowViewModel>()
       .AddSingleton<ServerControlViewModel>()
       .AddSingleton<MainWindowViewModel>();
   }

@@ -1,9 +1,15 @@
 using System.Diagnostics;
 using System.Reactive;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 using BLIS_NG.Server;
+using BLIS_NG.Config;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using System.IO;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace BLIS_NG.ViewModels;
 
@@ -18,11 +24,12 @@ public class ServerControlViewModel : ViewModelBase
     private readonly ILogger<ServerControlViewModel> logger;
     private readonly IMainServer mainServer;
     private readonly IClassicDesktopStyleApplicationLifetime _lifetime;
-    private readonly MySqlAdmin _mySqlAdmin;
+    private readonly ToolsWindowViewModel _toolsWindowViewModel;
 
     public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
     public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenPasswordResetCommand { get; }
+    public ReactiveCommand<Unit, Unit> SelectZipCommand { get; }
 
     private string _status = string.Empty;
     public string Status
@@ -51,23 +58,24 @@ public class ServerControlViewModel : ViewModelBase
         ILogger<ServerControlViewModel> logger,
         IMainServer mainServer,
         IClassicDesktopStyleApplicationLifetime lifetime,
-        MySqlAdmin mySqlAdmin)
+        ToolsWindowViewModel toolsWindowViewModel)
     {
-        this.logger  = logger;
+        this.logger = logger;
         this.mainServer = mainServer;
-        _lifetime    = lifetime;
-        _mySqlAdmin  = mySqlAdmin;
+        _lifetime = lifetime;
+        _toolsWindowViewModel = toolsWindowViewModel;
 
-        StartServerCommand    = ReactiveCommand.Create(HandleStartButtonClick);
-        StopServerCommand     = ReactiveCommand.Create(HandleStopButtonClick);
+        StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
+        StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
         OpenPasswordResetCommand = ReactiveCommand.Create(HandleOpenPasswordReset);
+        SelectZipCommand = ReactiveCommand.CreateFromTask(HandleSelectZipClick);
     }
 
     public void HandleStartButtonClick()
     {
         mainServer.Start(HealthcheckAndUpdateStatus);
         StartBlisEnabled = false;
-        StopBlisEnabled  = true;
+        StopBlisEnabled = true;
         Thread.Sleep(1000);
         OpenUrl(MainServer.ServerUri);
     }
@@ -82,38 +90,38 @@ public class ServerControlViewModel : ViewModelBase
     {
         if (serverStatus.Apache2 == MainServer.State.Healthy && serverStatus.MySql == MainServer.State.Healthy)
         {
-            Status           = "Status: Healthy";
+            Status = "Status: Healthy";
             StartBlisEnabled = false;
-            StopBlisEnabled  = true;
-            ProbablyRunning  = true;
+            StopBlisEnabled = true;
+            ProbablyRunning = true;
         }
         else if (serverStatus.Apache2 == MainServer.State.Started && serverStatus.MySql == MainServer.State.Started)
         {
-            Status           = "Status: Starting";
+            Status = "Status: Starting";
             StartBlisEnabled = false;
-            StopBlisEnabled  = false;
-            ProbablyRunning  = true;
+            StopBlisEnabled = false;
+            ProbablyRunning = true;
         }
         else if (serverStatus.Apache2 == MainServer.State.Stopped && serverStatus.MySql == MainServer.State.Healthy)
         {
-            Status           = "Status: Apache2 health check failed.";
+            Status = "Status: Apache2 health check failed.";
             StartBlisEnabled = true;
-            StopBlisEnabled  = false;
-            ProbablyRunning  = true;
+            StopBlisEnabled = false;
+            ProbablyRunning = true;
         }
         else if (serverStatus.Apache2 == MainServer.State.Stopping || serverStatus.MySql == MainServer.State.Stopping)
         {
-            Status           = "Status: Stopping";
+            Status = "Status: Stopping";
             StartBlisEnabled = false;
-            StopBlisEnabled  = false;
-            ProbablyRunning  = true;
+            StopBlisEnabled = false;
+            ProbablyRunning = true;
         }
         else
         {
-            Status           = "Status: Stopped";
+            Status = "Status: Stopped";
             StartBlisEnabled = true;
-            StopBlisEnabled  = false;
-            ProbablyRunning  = false;
+            StopBlisEnabled = false;
+            ProbablyRunning = false;
         }
     }
 
@@ -129,6 +137,47 @@ public class ServerControlViewModel : ViewModelBase
         }
     }
 
+    private async Task HandleSelectZipClick()
+    {
+        if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
+            && desktop.MainWindow != null)
+        {
+            var topLevel = Avalonia.Controls.TopLevel.GetTopLevel(desktop.MainWindow);
+            if (topLevel != null)
+            {
+                var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                {
+                    Title = "Select ZIP File",
+                    FileTypeFilter = new[]
+                    {
+                        new FilePickerFileType("ZIP Files")
+                        {
+                            Patterns = new[] { "*.zip" }
+                        }
+                    },
+                    AllowMultiple = false
+                });
+
+                if (files.Count > 0)
+                {
+                    string selectedFile = files[0].Path.LocalPath;
+
+                    // Launch the update window logic
+                    var updateVm = new UpdateProgressViewModel();
+                    var updateWindow = new Views.UpdateProgressWindow
+                    {
+                        DataContext = updateVm
+                    };
+
+                    updateWindow.Show(desktop.MainWindow);
+
+                    // Start the update process and close window when done
+                    await updateVm.StartUpdate(selectedFile, () => updateWindow.Close());
+                }
+            }
+        }
+    }
+
     public void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
         HandleStopButtonClick();
@@ -137,8 +186,8 @@ public class ServerControlViewModel : ViewModelBase
     private void HandleOpenPasswordReset()
     {
         if (_lifetime.MainWindow is null) return;
-        var viewModel   = new ToolsWindowViewModel(_mySqlAdmin);
-        var toolsWindow = new BLIS_NG.Views.ToolsWindow(viewModel);
+        _toolsWindowViewModel.PasswordResetViewModel.ResetForm();
+        var toolsWindow = new BLIS_NG.Views.ToolsWindow(_toolsWindowViewModel);
         toolsWindow.ShowDialog(_lifetime.MainWindow);
     }
 }
