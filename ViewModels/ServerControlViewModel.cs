@@ -188,6 +188,8 @@ public class ServerControlViewModel : ViewModelBase
         if (_lifetime.MainWindow is null) return;
         _toolsWindowViewModel.PasswordResetViewModel.ResetForm();
         var toolsWindow = new BLIS_NG.Views.ToolsWindow(_toolsWindowViewModel);
+        //close window action after successful reset
+        _toolsWindowViewModel.PasswordResetViewModel.RequestClose = () => toolsWindow.Close();
         toolsWindow.ShowDialog(_lifetime.MainWindow);
     }
 }

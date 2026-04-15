@@ -22,6 +22,8 @@ public class PasswordResetViewModel : ViewModelBase
 
     private readonly MySql _mySql;
 
+    public Action? RequestClose { get; set; }
+
     public ReactiveCommand<Unit, Unit> ProceedToVerifyCommand { get; }
     public ReactiveCommand<Unit, Unit> ConfirmResetCommand { get; }
     public ReactiveCommand<Unit, Unit> BackCommand { get; }
@@ -272,7 +274,19 @@ public class PasswordResetViewModel : ViewModelBase
         var success = await _mySql.ResetUserPassword(Username, sha1Hash);
 
         if (success)
-            SuccessMessage = $"Password for '{Username}' was reset successfully.";
+        {
+            SuccessMessage = $"Password for '{Username}' was reset successfully. This window will close soon.";
+
+            _ = System.Threading.Tasks.Task.Run(async () =>
+            {
+                await System.Threading.Tasks.Task.Delay(5000);
+
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    RequestClose?.Invoke();
+                });
+            });
+        }
         else
             ErrorMessage = "Failed to reset password. Please check the username and try again.";
     }
