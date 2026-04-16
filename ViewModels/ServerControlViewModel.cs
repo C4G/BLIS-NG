@@ -10,16 +10,14 @@ using System.IO;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using BLIS_NG.Lang;
 
 namespace BLIS_NG.ViewModels;
 
 public class ServerControlViewModel : ViewModelBase
 {
     private const string AppVersionNumber = "4.0";
-    public static string AppVersion
-    {
-        get { return $"BLIS for Windows {AppVersionNumber}"; }
-    }
+    public static string AppVersion => string.Format(Resources.App_Version_Format, AppVersionNumber);
 
     private readonly ILogger<ServerControlViewModel> logger;
     private readonly IMainServer mainServer;
@@ -90,35 +88,35 @@ public class ServerControlViewModel : ViewModelBase
     {
         if (serverStatus.Apache2 == MainServer.State.Healthy && serverStatus.MySql == MainServer.State.Healthy)
         {
-            Status = "Status: Healthy";
+            Status = Resources.Status_Healthy;
             StartBlisEnabled = false;
             StopBlisEnabled = true;
             ProbablyRunning = true;
         }
         else if (serverStatus.Apache2 == MainServer.State.Started && serverStatus.MySql == MainServer.State.Started)
         {
-            Status = "Status: Starting";
+            Status = Resources.Status_Starting;
             StartBlisEnabled = false;
             StopBlisEnabled = false;
             ProbablyRunning = true;
         }
         else if (serverStatus.Apache2 == MainServer.State.Stopped && serverStatus.MySql == MainServer.State.Healthy)
         {
-            Status = "Status: Apache2 health check failed.";
+            Status = Resources.Status_ApacheHealthcheckFailed;
             StartBlisEnabled = true;
             StopBlisEnabled = false;
             ProbablyRunning = true;
         }
         else if (serverStatus.Apache2 == MainServer.State.Stopping || serverStatus.MySql == MainServer.State.Stopping)
         {
-            Status = "Status: Stopping";
+            Status = Resources.Status_Stopping;
             StartBlisEnabled = false;
             StopBlisEnabled = false;
             ProbablyRunning = true;
         }
         else
         {
-            Status = "Status: Stopped";
+            Status = Resources.Status_Stopped;
             StartBlisEnabled = true;
             StopBlisEnabled = false;
             ProbablyRunning = false;

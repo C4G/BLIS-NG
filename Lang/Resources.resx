@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0,
+      Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0,
+      Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="App_Title" xml:space="preserve">
+    <value>Basic Lab Information System (BLIS)</value>
+  </data>
+  <data name="App_Version_Format" xml:space="preserve">
+    <value>BLIS for Windows {0}</value>
+  </data>
+  <data name="App_Tagline" xml:space="preserve">
+    <value>A Joint Initiative of C4G at Georgia Tech,
+the CDC, and participating countries.</value>
+  </data>
+  <data name="App_LicenseNotice" xml:space="preserve">
+    <value>C4G BLIS has been licensed under the GNU General Public License version 3.
+For more information, visit blis.cc.gatech.edu.</value>
+  </data>
+  <data name="Button_StartBlis" xml:space="preserve">
+    <value>Start BLIS</value>
+  </data>
+  <data name="Button_StopBlis" xml:space="preserve">
+    <value>Stop BLIS</value>
+  </data>
+  <data name="Status_Healthy" xml:space="preserve">
+    <value>Status: Healthy</value>
+  </data>
+  <data name="Status_Starting" xml:space="preserve">
+    <value>Status: Starting</value>
+  </data>
+  <data name="Status_ApacheHealthcheckFailed" xml:space="preserve">
+    <value>Status: Apache2 health check failed.</value>
+  </data>
+  <data name="Status_Stopping" xml:space="preserve">
+    <value>Status: Stopping</value>
+  </data>
+  <data name="Status_Stopped" xml:space="preserve">
+    <value>Status: Stopped</value>
+  </data>
+</root>
