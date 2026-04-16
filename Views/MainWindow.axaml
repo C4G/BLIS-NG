@@ -24,12 +24,12 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Grid
+	<Grid
         DataContext="{Binding ServerControlViewModel}"
         ColumnDefinitions="*,*,*,*,*"
-        RowDefinitions="*,*,*,Auto,*"
+        RowDefinitions="*,*,*,*,auto,*"
     >
-        <TextBlock
+		<TextBlock
             TextAlignment="Left"
             FontWeight="Normal"
             FontSize="36"
@@ -63,6 +63,7 @@
             <Run Text="{x:Static lang:Resources.App_Tagline}" />
         </TextBlock>
 
+
         <TextBlock
             FontSize="12"
             FontFamily="Times New Roman"
@@ -74,24 +75,40 @@
             <Run Text="{x:Static lang:Resources.App_LicenseNotice}" />
         </TextBlock>
 
+
         <StackPanel
             Orientation="Horizontal"
             Spacing="15"
-            Grid.Row="4"
+            Grid.Row="5"
             Grid.Column="0"
-            Grid.ColumnSpan="5"
-        >
-            <TextBlock Width="240" VerticalAlignment="Center" Text="{Binding Status}"></TextBlock>
-            <Button Width="160"
-                Command="{Binding StartServerCommand}"
-                IsEnabled="{Binding StartBlisEnabled}"
-                Content="{x:Static lang:Resources.Button_StartBlis}" />
+            Grid.ColumnSpan="5">
 
-            <Button Width="160"
-                Command="{Binding StopServerCommand}"
-                IsEnabled="{Binding StopBlisEnabled}"
-                Content="{x:Static lang:Resources.Button_StopBlis}" />
+            <TextBlock Width="240" VerticalAlignment="Center" Text="{Binding Status}" />
 
+            <Button Width="110" Height="45"
+                    Command="{Binding StartServerCommand}"
+                    IsEnabled="{Binding StartBlisEnabled}"
+                    Content="Start BLIS"
+                    VerticalContentAlignment="Center"
+                    HorizontalContentAlignment="Center" />
+
+            <Button Width="110" Height="45"
+                    Command="{Binding StopServerCommand}"
+                    IsEnabled="{Binding StopBlisEnabled}"
+                    Content="Stop BLIS"
+                    VerticalContentAlignment="Center"
+                    HorizontalContentAlignment="Center" />
+
+            <Button Content="More Options" Width="110" Height="45" VerticalContentAlignment="Center">
+                <Button.Flyout>
+                    <MenuFlyout Placement="Bottom">
+                        <MenuItem Header="Update with ZIP File"
+                                Command="{Binding SelectZipCommand}" />
+                        <Separator /> <MenuItem Header="Reset Password"
+                          Command="{Binding OpenPasswordResetCommand}" />
+                        </MenuFlyout>
+                </Button.Flyout>
+            </Button>
         </StackPanel>
     </Grid>
 </Window>
