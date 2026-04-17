@@ -64,7 +64,8 @@ public class ServerControlViewModel : ViewModelBase
 
     public async void HandleStopButtonClick()
     {
-        if (StopBlisEnabled) {
+        if (StopBlisEnabled)
+        {
             await mainServer.Stop();
         }
     }
@@ -91,7 +92,7 @@ public class ServerControlViewModel : ViewModelBase
             StartBlisEnabled = true;
             StopBlisEnabled = false;
             ProbablyRunning = true;
-        } 
+        }
         else if (serverStatus.Apache2 == MainServer.State.Stopping || serverStatus.MySql == MainServer.State.Stopping)
         {
             Status = Resources.Status_Stopping;
