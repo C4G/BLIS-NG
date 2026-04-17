@@ -64,50 +64,49 @@
   </resheader>
 
   <data name="App_Title" xml:space="preserve">
-    <value>Basic Lab Information System (BLIS)</value>
-  </data>
-  <data name="App_Version_Format" xml:space="preserve">
-    <value>BLIS for Windows {0}</value>
-  </data>
-  <data name="App_Tagline" xml:space="preserve">
-    <value>A Joint Initiative of C4G at Georgia Tech,
-the CDC, and participating countries.</value>
-  </data>
-  <data name="App_LicenseNotice" xml:space="preserve">
-    <value>C4G BLIS has been licensed under the GNU General Public License version 3.
-For more information, visit blis.cc.gatech.edu.</value>
-  </data>
-  <data name="Button_StartBlis" xml:space="preserve">
-    <value>Start BLIS</value>
-  </data>
-  <data name="Button_StopBlis" xml:space="preserve">
-    <value>Stop BLIS</value>
-  </data>
-  <data name="Status_Healthy" xml:space="preserve">
-    <value>Status: Healthy</value>
-  </data>
-  <data name="Status_Starting" xml:space="preserve">
-    <value>Status: Starting</value>
-  </data>
-  <data name="Status_ApacheHealthcheckFailed" xml:space="preserve">
-    <value>Status: Apache2 health check failed.</value>
-  </data>
-  <data name="Status_Stopping" xml:space="preserve">
-    <value>Status: Stopping</value>
-  </data>
-  <data name="Status_Stopped" xml:space="preserve">
-    <value>Status: Stopped</value>
-  </data>
-  <data name="Label_Language" xml:space="preserve">
-    <value>Language:</value>
-  </data>
-  <data name="Language_English" xml:space="preserve">
-    <value>English</value>
-  </data>
-  <data name="Language_French" xml:space="preserve">
-    <value>French</value>
-  </data>
-  <data name="Message_RestartRequired" xml:space="preserve">
-    <value>Language updated. Restart the launcher to apply all text changes.</value>
-  </data>
+  <value>Système d'information de laboratoire de base (BLIS)</value>
+</data>
+<data name="App_Version_Format" xml:space="preserve">
+  <value>BLIS pour Windows {0}</value>
+</data>
+<data name="App_Tagline" xml:space="preserve">
+  <value>Une initiative conjointe de C4G à Georgia Tech, du CDC et des pays participants.</value>
+</data>
+<data name="App_LicenseNotice" xml:space="preserve">
+  <value>C4G BLIS est sous licence GNU General Public License version 3. Pour plus d'informations, visitez blis.cc.gatech.edu.</value>
+</data>
+<data name="Button_StartBlis" xml:space="preserve">
+  <value>Démarrer BLIS</value>
+</data>
+<data name="Button_StopBlis" xml:space="preserve">
+  <value>Arrêter BLIS</value>
+</data>
+<data name="Status_Healthy" xml:space="preserve">
+  <value>Statut : Fonctionnel</value>
+</data>
+<data name="Status_Starting" xml:space="preserve">
+  <value>Statut : Démarrage en cours</value>
+</data>
+<data name="Status_ApacheHealthcheckFailed" xml:space="preserve">
+  <value>Statut : Échec de la vérification d'état d'Apache2.</value>
+</data>
+<data name="Status_Stopping" xml:space="preserve">
+  <value>Statut : Arrêt en cours</value>
+</data>
+<data name="Status_Stopped" xml:space="preserve">
+  <value>Statut : Arrêté</value>
+</data>
+<data name="Label_Language" xml:space="preserve">
+  <value>Langue :</value>
+</data>
+<data name="Language_English" xml:space="preserve">
+  <value>Anglais</value>
+</data>
+<data name="Language_French" xml:space="preserve">
+  <value>Français</value>
+</data>
+<data name="Message_RestartRequired" xml:space="preserve">
+  <value>Langue mise à jour. Redémarrez le lanceur pour appliquer tous les changements de texte.</value>
+</data>
+
 </root>
