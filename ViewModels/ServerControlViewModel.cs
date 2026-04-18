@@ -1,25 +1,55 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Reactive;
 using Avalonia.Controls.ApplicationLifetimes;
+using BLIS_NG.Config;
 using Avalonia.Platform.Storage;
 using BLIS_NG.Server;
-using BLIS_NG.Config;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using System.IO;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using BLIS_NG.Lang;
 
 namespace BLIS_NG.ViewModels;
 
+public class LanguageOption
+{
+    public string Code { get; }
+    public string DisplayName { get; }
+
+    public LanguageOption(string code, string displayName)
+    {
+        Code = code;
+        DisplayName = displayName;
+    }
+}
+
 public class ServerControlViewModel : ViewModelBase
 {
-    private const string AppVersionNumber = "4.0";
-    public static string AppVersion
+    private enum UiStatusState
     {
-        get { return $"BLIS for Windows {AppVersionNumber}"; }
+        Unknown,
+        Healthy,
+        Starting,
+        ApacheHealthcheckFailed,
+        Stopping,
+        Stopped
     }
+
+    private const string AppVersionNumber = "4.0";
+    public string AppVersion => string.Format(Resources.App_Version_Format, AppVersionNumber);
+    public string AppTitle => Resources.App_Title;
+    public string AppTagline => Resources.App_Tagline;
+    public string AppLicenseNotice => Resources.App_LicenseNotice;
+    public string StartBlisText => Resources.Button_StartBlis;
+    public string StopBlisText => Resources.Button_StopBlis;
+    public string MoreOptionsText => Resources.Button_MoreOptions;
+    public string UpdateWithZipFileText => Resources.Menu_UpdateWithZipFile;
+    public string ResetPasswordText => Resources.Menu_ResetPassword;
+    public string LanguageLabel => Resources.Label_Language;
 
     private readonly ILogger<ServerControlViewModel> logger;
     private readonly ILoggerFactory _loggerFactory;
@@ -31,6 +61,10 @@ public class ServerControlViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
     public ReactiveCommand<Unit, Unit> OpenPasswordResetCommand { get; }
     public ReactiveCommand<Unit, Unit> SelectZipCommand { get; }
+    public IReadOnlyList<LanguageOption> AvailableLanguages { get; }
+
+    private bool _initializingLanguageSelection = true;
+    private UiStatusState _currentStatusState = UiStatusState.Stopped;
 
     private string _status = string.Empty;
     public string Status
@@ -55,6 +89,29 @@ public class ServerControlViewModel : ViewModelBase
 
     public bool ProbablyRunning { get; private set; }
 
+    private LanguageOption? _selectedLanguage;
+    public LanguageOption? SelectedLanguage
+    {
+        get => _selectedLanguage;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedLanguage, value);
+            if (_initializingLanguageSelection || value == null)
+            {
+                return;
+            }
+
+            var culture = new CultureInfo(value.Code);
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+            CultureInfo.CurrentCulture = culture;
+            CultureInfo.CurrentUICulture = culture;
+            Resources.Culture = culture;
+            LanguagePreferences.SaveLanguageCode(value.Code);
+            RefreshLocalizedUi();
+        }
+    }
+
     public ServerControlViewModel(
         ILogger<ServerControlViewModel> logger,
         ILoggerFactory loggerFactory,
@@ -73,6 +130,17 @@ public class ServerControlViewModel : ViewModelBase
         StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
         OpenPasswordResetCommand = ReactiveCommand.Create(HandleOpenPasswordReset);
         SelectZipCommand = ReactiveCommand.CreateFromTask(HandleSelectZipClick);
+
+        AvailableLanguages = new List<LanguageOption>
+        {
+            new("en", "English"),
+            new("fr", "Francais"),
+        };
+
+        var savedLanguageCode = LanguagePreferences.GetLanguageCode();
+        SelectedLanguage = AvailableLanguages.FirstOrDefault(x => x.Code == savedLanguageCode) ?? AvailableLanguages[0];
+        _initializingLanguageSelection = false;
+        RefreshLocalizedUi();
     }
 
     public void HandleStartButtonClick()
@@ -94,39 +162,71 @@ public class ServerControlViewModel : ViewModelBase
     {
         if (serverStatus.Apache2 == MainServer.State.Healthy && serverStatus.MySql == MainServer.State.Healthy)
         {
-            Status = "Status: Healthy";
+            _currentStatusState = UiStatusState.Healthy;
+            ApplyCurrentStatusText();
             StartBlisEnabled = false;
             StopBlisEnabled = true;
             ProbablyRunning = true;
         }
         else if (serverStatus.Apache2 == MainServer.State.Started && serverStatus.MySql == MainServer.State.Started)
         {
-            Status = "Status: Starting";
+            _currentStatusState = UiStatusState.Starting;
+            ApplyCurrentStatusText();
             StartBlisEnabled = false;
             StopBlisEnabled = false;
             ProbablyRunning = true;
         }
         else if (serverStatus.Apache2 == MainServer.State.Stopped && serverStatus.MySql == MainServer.State.Healthy)
         {
-            Status = "Status: Apache2 health check failed.";
+            _currentStatusState = UiStatusState.ApacheHealthcheckFailed;
+            ApplyCurrentStatusText();
             StartBlisEnabled = true;
             StopBlisEnabled = false;
             ProbablyRunning = true;
         }
         else if (serverStatus.Apache2 == MainServer.State.Stopping || serverStatus.MySql == MainServer.State.Stopping)
         {
-            Status = "Status: Stopping";
+            _currentStatusState = UiStatusState.Stopping;
+            ApplyCurrentStatusText();
             StartBlisEnabled = false;
             StopBlisEnabled = false;
             ProbablyRunning = true;
         }
         else
         {
-            Status = "Status: Stopped";
+            _currentStatusState = UiStatusState.Stopped;
+            ApplyCurrentStatusText();
             StartBlisEnabled = true;
             StopBlisEnabled = false;
             ProbablyRunning = false;
         }
+    }
+
+    private void ApplyCurrentStatusText()
+    {
+        Status = _currentStatusState switch
+        {
+            UiStatusState.Healthy => Resources.Status_Healthy,
+            UiStatusState.Starting => Resources.Status_Starting,
+            UiStatusState.ApacheHealthcheckFailed => Resources.Status_ApacheHealthcheckFailed,
+            UiStatusState.Stopping => Resources.Status_Stopping,
+            _ => Resources.Status_Stopped,
+        };
+    }
+
+    private void RefreshLocalizedUi()
+    {
+        this.RaisePropertyChanged(nameof(AppVersion));
+        this.RaisePropertyChanged(nameof(AppTitle));
+        this.RaisePropertyChanged(nameof(AppTagline));
+        this.RaisePropertyChanged(nameof(AppLicenseNotice));
+        this.RaisePropertyChanged(nameof(StartBlisText));
+        this.RaisePropertyChanged(nameof(StopBlisText));
+        this.RaisePropertyChanged(nameof(MoreOptionsText));
+        this.RaisePropertyChanged(nameof(UpdateWithZipFileText));
+        this.RaisePropertyChanged(nameof(ResetPasswordText));
+        this.RaisePropertyChanged(nameof(LanguageLabel));
+        ApplyCurrentStatusText();
     }
 
     private void OpenUrl(Uri url)
@@ -151,10 +251,10 @@ public class ServerControlViewModel : ViewModelBase
             {
                 var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
                 {
-                    Title = "Select ZIP File",
+                    Title = Resources.Picker_SelectZipFile,
                     FileTypeFilter = new[]
                     {
-                        new FilePickerFileType("ZIP Files")
+                        new FilePickerFileType(Resources.Picker_ZipFiles)
                         {
                             Patterns = new[] { "*.zip" }
                         }
@@ -194,6 +294,8 @@ public class ServerControlViewModel : ViewModelBase
         if (_lifetime.MainWindow is null) return;
         _toolsWindowViewModel.PasswordResetViewModel.ResetForm();
         var toolsWindow = new BLIS_NG.Views.ToolsWindow(_toolsWindowViewModel);
+        //close window action after successful reset
+        _toolsWindowViewModel.PasswordResetViewModel.RequestClose = () => toolsWindow.Close();
         toolsWindow.ShowDialog(_lifetime.MainWindow);
     }
 }

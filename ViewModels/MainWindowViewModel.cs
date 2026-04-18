@@ -5,8 +5,6 @@ namespace BLIS_NG.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    public static string WindowTitle { get => ServerControlViewModel.AppVersion; }
-
     public static WindowState WindowState { get; set; }
 
     public ServerControlViewModel ServerControlViewModel { get; init; }
@@ -18,9 +16,19 @@ public class MainWindowViewModel : ViewModelBase
         ApplicationLifetime = lifetime;
         ServerControlViewModel = serverControlViewModel;
 
-        // Start BLIS on app start
-        ServerControlViewModel.HandleStartButtonClick();
-        WindowState = WindowState.Minimized;
+        // BLIS doesn't (yet) run on non-Windows platforms,
+        // so don't attempt to open it in the browser if we're not
+        // on Windows.
+        if (OperatingSystem.IsWindows())
+        {
+            // Start BLIS on app start
+            ServerControlViewModel.HandleStartButtonClick();
+
+            // macOS implementation note: if the application starts minimized,
+            // the launcher window will fail to render properly.
+            // So if this is ever enabled for macOS... don't start minimized.
+            WindowState = WindowState.Minimized;
+        }
     }
 
     public bool Shutdown()

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0,
+      Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0,
+      Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="App_Title" xml:space="preserve">
+  <value>Système d'information de laboratoire de base (BLIS)</value>
+</data>
+<data name="App_Version_Format" xml:space="preserve">
+  <value>BLIS pour Windows {0}</value>
+</data>
+<data name="App_Tagline" xml:space="preserve">
+  <value>Une initiative conjointe de C4G à Georgia Tech, du CDC et des pays participants.</value>
+</data>
+<data name="App_LicenseNotice" xml:space="preserve">
+  <value>C4G BLIS est sous licence GNU General Public License version 3. Pour plus d'informations, visitez blis.cc.gatech.edu.</value>
+</data>
+<data name="Button_StartBlis" xml:space="preserve">
+  <value>Démarrer BLIS</value>
+</data>
+<data name="Button_StopBlis" xml:space="preserve">
+  <value>Arrêter BLIS</value>
+</data>
+<data name="Status_Healthy" xml:space="preserve">
+  <value>Statut : Fonctionnel</value>
+</data>
+<data name="Status_Starting" xml:space="preserve">
+  <value>Statut : Démarrage en cours</value>
+</data>
+<data name="Status_ApacheHealthcheckFailed" xml:space="preserve">
+  <value>Statut : Échec de la vérification d'état d'Apache2.</value>
+</data>
+<data name="Status_Stopping" xml:space="preserve">
+  <value>Statut : Arrêt en cours</value>
+</data>
+<data name="Status_Stopped" xml:space="preserve">
+  <value>Statut : Arrêté</value>
+</data>
+<data name="Label_Language" xml:space="preserve">
+  <value>Langue :</value>
+</data>
+<data name="Language_English" xml:space="preserve">
+  <value>Anglais</value>
+</data>
+<data name="Language_French" xml:space="preserve">
+  <value>Français</value>
+</data>
+<data name="Message_RestartRequired" xml:space="preserve">
+  <value>Langue mise à jour. Redémarrez le lanceur pour appliquer tous les changements de texte.</value>
+</data>
+<data name="Button_MoreOptions" xml:space="preserve">
+  <value>Plus d'options</value>
+</data>
+<data name="Menu_UpdateWithZipFile" xml:space="preserve">
+  <value>Mettre à jour avec un fichier ZIP</value>
+</data>
+<data name="Menu_ResetPassword" xml:space="preserve">
+  <value>Réinitialiser le mot de passe</value>
+</data>
+<data name="Picker_SelectZipFile" xml:space="preserve">
+  <value>Sélectionner un fichier ZIP</value>
+</data>
+<data name="Picker_ZipFiles" xml:space="preserve">
+  <value>Fichiers ZIP</value>
+</data>
+
+</root>
