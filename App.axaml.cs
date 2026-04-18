@@ -40,9 +40,10 @@ public partial class App : Application
             // See Lib/ServiceCollectionExtensions.cs to see the dependency injection entrypoint.
             .AddDependencies();
 
-        if (ApplicationLifetime != null)
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopLifetime)
         {
             collection.AddSingleton(ApplicationLifetime);
+            collection.AddSingleton(desktopLifetime);
         }
 
         var services = collection.BuildServiceProvider();

@@ -3,9 +3,14 @@ using System.Globalization;
 using System.Reactive;
 using Avalonia.Controls.ApplicationLifetimes;
 using BLIS_NG.Config;
+using Avalonia.Platform.Storage;
 using BLIS_NG.Server;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using System.IO;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using BLIS_NG.Lang;
 
 namespace BLIS_NG.ViewModels;
@@ -45,6 +50,8 @@ public class ServerControlViewModel : ViewModelBase
 
     private readonly ILogger<ServerControlViewModel> logger;
     private readonly IMainServer mainServer;
+    private readonly IClassicDesktopStyleApplicationLifetime _lifetime;
+    private readonly ToolsWindowViewModel _toolsWindowViewModel;
 
     public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
     public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
@@ -52,6 +59,8 @@ public class ServerControlViewModel : ViewModelBase
 
     private bool _initializingLanguageSelection = true;
     private UiStatusState _currentStatusState = UiStatusState.Stopped;
+    public ReactiveCommand<Unit, Unit> OpenPasswordResetCommand { get; }
+    public ReactiveCommand<Unit, Unit> SelectZipCommand { get; }
 
     private string _status = string.Empty;
     public string Status
@@ -99,10 +108,16 @@ public class ServerControlViewModel : ViewModelBase
         }
     }
 
-    public ServerControlViewModel(ILogger<ServerControlViewModel> logger, IMainServer mainServer)
+    public ServerControlViewModel(
+        ILogger<ServerControlViewModel> logger,
+        IMainServer mainServer,
+        IClassicDesktopStyleApplicationLifetime lifetime,
+        ToolsWindowViewModel toolsWindowViewModel)
     {
         this.logger = logger;
         this.mainServer = mainServer;
+        _lifetime = lifetime;
+        _toolsWindowViewModel = toolsWindowViewModel;
 
         StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
         StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
@@ -117,15 +132,15 @@ public class ServerControlViewModel : ViewModelBase
         SelectedLanguage = AvailableLanguages.FirstOrDefault(x => x.Code == savedLanguageCode) ?? AvailableLanguages[0];
         _initializingLanguageSelection = false;
         RefreshLocalizedUi();
+        OpenPasswordResetCommand = ReactiveCommand.Create(HandleOpenPasswordReset);
+        SelectZipCommand = ReactiveCommand.CreateFromTask(HandleSelectZipClick);
     }
 
     public void HandleStartButtonClick()
     {
         mainServer.Start(HealthcheckAndUpdateStatus);
-
         StartBlisEnabled = false;
         StopBlisEnabled = true;
-
         Thread.Sleep(1000);
         OpenUrl(MainServer.ServerUri);
     }
@@ -133,9 +148,7 @@ public class ServerControlViewModel : ViewModelBase
     public async void HandleStopButtonClick()
     {
         if (StopBlisEnabled)
-        {
             await mainServer.Stop();
-        }
     }
 
     private void HealthcheckAndUpdateStatus(MainServer.ServerStatus serverStatus)
@@ -218,9 +231,59 @@ public class ServerControlViewModel : ViewModelBase
         }
     }
 
+    private async Task HandleSelectZipClick()
+    {
+        if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
+            && desktop.MainWindow != null)
+        {
+            var topLevel = Avalonia.Controls.TopLevel.GetTopLevel(desktop.MainWindow);
+            if (topLevel != null)
+            {
+                var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                {
+                    Title = "Select ZIP File",
+                    FileTypeFilter = new[]
+                    {
+                        new FilePickerFileType("ZIP Files")
+                        {
+                            Patterns = new[] { "*.zip" }
+                        }
+                    },
+                    AllowMultiple = false
+                });
+
+                if (files.Count > 0)
+                {
+                    string selectedFile = files[0].Path.LocalPath;
+
+                    // Launch the update window logic
+                    var updateVm = new UpdateProgressViewModel();
+                    var updateWindow = new Views.UpdateProgressWindow
+                    {
+                        DataContext = updateVm
+                    };
+
+                    updateWindow.Show(desktop.MainWindow);
+
+                    // Start the update process and close window when done
+                    await updateVm.StartUpdate(selectedFile, () => updateWindow.Close());
+                }
+            }
+        }
+    }
+
     public void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     {
-        // Shutdown server when closing
         HandleStopButtonClick();
+    }
+
+    private void HandleOpenPasswordReset()
+    {
+        if (_lifetime.MainWindow is null) return;
+        _toolsWindowViewModel.PasswordResetViewModel.ResetForm();
+        var toolsWindow = new BLIS_NG.Views.ToolsWindow(_toolsWindowViewModel);
+        //close window action after successful reset
+        _toolsWindowViewModel.PasswordResetViewModel.RequestClose = () => toolsWindow.Close();
+        toolsWindow.ShowDialog(_lifetime.MainWindow);
     }
 }

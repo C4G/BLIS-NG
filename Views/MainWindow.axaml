@@ -23,7 +23,7 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Grid
+	<Grid
         DataContext="{Binding ServerControlViewModel}"
         ColumnDefinitions="*"
         RowDefinitions="Auto,Auto,Auto,Auto,*,Auto"
@@ -60,6 +60,7 @@
             Grid.Column="0"
         />
 
+
         <TextBlock
             Text="{Binding AppLicenseNotice}"
             FontSize="12"
@@ -73,12 +74,12 @@
             Grid.Row="5"
             Grid.Column="0"
             Margin="0,12,0,0"
-            ColumnDefinitions="Auto,*,Auto"
-            VerticalAlignment="Center"
+            RowDefinitions="Auto,Auto"
+            RowSpacing="8"
         >
-            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center" Grid.Row="0">
                 <TextBlock VerticalAlignment="Center" Text="{Binding LanguageLabel}" />
-                <ComboBox MinWidth="95"
+                <ComboBox Width="110"
                           ItemsSource="{Binding AvailableLanguages}"
                           SelectedItem="{Binding SelectedLanguage}">
                     <ComboBox.ItemTemplate>
@@ -87,26 +88,30 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
+                <TextBlock VerticalAlignment="Center"
+                           Text="{Binding Status}" />
             </StackPanel>
 
-            <TextBlock Grid.Column="1"
-                       Margin="24,0,24,0"
-                       VerticalAlignment="Center"
-                       TextWrapping="NoWrap"
-                       TextTrimming="CharacterEllipsis"
-                       Text="{Binding Status}" />
-
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button MinWidth="120"
-                        Padding="12,6"
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" HorizontalAlignment="Right">
+                <Button Width="110" Height="40"
                         Command="{Binding StartServerCommand}"
                         IsEnabled="{Binding StartBlisEnabled}"
                         Content="{Binding StartBlisText}" />
-                <Button MinWidth="120"
-                        Padding="12,6"
+                <Button Width="110" Height="40"
                         Command="{Binding StopServerCommand}"
                         IsEnabled="{Binding StopBlisEnabled}"
                         Content="{Binding StopBlisText}" />
+                <Button Content="More Options" Width="110" Height="40" VerticalContentAlignment="Center">
+                    <Button.Flyout>
+                        <MenuFlyout Placement="Bottom">
+                            <MenuItem Header="Update with ZIP File"
+                                      Command="{Binding SelectZipCommand}" />
+                            <Separator />
+                            <MenuItem Header="Reset Password"
+                                      Command="{Binding OpenPasswordResetCommand}" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
             </StackPanel>
         </Grid>
     </Grid>
