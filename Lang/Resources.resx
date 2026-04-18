@@ -110,4 +110,19 @@ For more information, visit blis.cc.gatech.edu.</value>
   <data name="Message_RestartRequired" xml:space="preserve">
     <value>Language updated. Restart the launcher to apply all text changes.</value>
   </data>
+  <data name="Button_MoreOptions" xml:space="preserve">
+    <value>More Options</value>
+  </data>
+  <data name="Menu_UpdateWithZipFile" xml:space="preserve">
+    <value>Update with ZIP File</value>
+  </data>
+  <data name="Menu_ResetPassword" xml:space="preserve">
+    <value>Reset Password</value>
+  </data>
+  <data name="Picker_SelectZipFile" xml:space="preserve">
+    <value>Select ZIP File</value>
+  </data>
+  <data name="Picker_ZipFiles" xml:space="preserve">
+    <value>ZIP Files</value>
+  </data>
 </root>

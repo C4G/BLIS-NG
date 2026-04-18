@@ -101,13 +101,13 @@
                         Command="{Binding StopServerCommand}"
                         IsEnabled="{Binding StopBlisEnabled}"
                         Content="{Binding StopBlisText}" />
-                <Button Content="More Options" Width="110" Height="40" VerticalContentAlignment="Center">
+                <Button Content="{Binding MoreOptionsText}" Width="110" Height="40" VerticalContentAlignment="Center">
                     <Button.Flyout>
                         <MenuFlyout Placement="Bottom">
-                            <MenuItem Header="Update with ZIP File"
+                            <MenuItem Header="{Binding UpdateWithZipFileText}"
                                       Command="{Binding SelectZipCommand}" />
                             <Separator />
-                            <MenuItem Header="Reset Password"
+                            <MenuItem Header="{Binding ResetPasswordText}"
                                       Command="{Binding OpenPasswordResetCommand}" />
                         </MenuFlyout>
                     </Button.Flyout>
