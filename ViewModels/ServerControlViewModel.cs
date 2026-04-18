@@ -46,6 +46,9 @@ public class ServerControlViewModel : ViewModelBase
     public string AppLicenseNotice => Resources.App_LicenseNotice;
     public string StartBlisText => Resources.Button_StartBlis;
     public string StopBlisText => Resources.Button_StopBlis;
+    public string MoreOptionsText => Resources.Button_MoreOptions;
+    public string UpdateWithZipFileText => Resources.Menu_UpdateWithZipFile;
+    public string ResetPasswordText => Resources.Menu_ResetPassword;
     public string LanguageLabel => Resources.Label_Language;
 
     private readonly ILogger<ServerControlViewModel> logger;
@@ -55,12 +58,12 @@ public class ServerControlViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
     public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
+    public ReactiveCommand<Unit, Unit> OpenPasswordResetCommand { get; }
+    public ReactiveCommand<Unit, Unit> SelectZipCommand { get; }
     public IReadOnlyList<LanguageOption> AvailableLanguages { get; }
 
     private bool _initializingLanguageSelection = true;
     private UiStatusState _currentStatusState = UiStatusState.Stopped;
-    public ReactiveCommand<Unit, Unit> OpenPasswordResetCommand { get; }
-    public ReactiveCommand<Unit, Unit> SelectZipCommand { get; }
 
     private string _status = string.Empty;
     public string Status
@@ -121,6 +124,8 @@ public class ServerControlViewModel : ViewModelBase
 
         StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
         StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
+        OpenPasswordResetCommand = ReactiveCommand.Create(HandleOpenPasswordReset);
+        SelectZipCommand = ReactiveCommand.CreateFromTask(HandleSelectZipClick);
 
         AvailableLanguages = new List<LanguageOption>
         {
@@ -132,8 +137,6 @@ public class ServerControlViewModel : ViewModelBase
         SelectedLanguage = AvailableLanguages.FirstOrDefault(x => x.Code == savedLanguageCode) ?? AvailableLanguages[0];
         _initializingLanguageSelection = false;
         RefreshLocalizedUi();
-        OpenPasswordResetCommand = ReactiveCommand.Create(HandleOpenPasswordReset);
-        SelectZipCommand = ReactiveCommand.CreateFromTask(HandleSelectZipClick);
     }
 
     public void HandleStartButtonClick()
@@ -215,6 +218,9 @@ public class ServerControlViewModel : ViewModelBase
         this.RaisePropertyChanged(nameof(AppLicenseNotice));
         this.RaisePropertyChanged(nameof(StartBlisText));
         this.RaisePropertyChanged(nameof(StopBlisText));
+        this.RaisePropertyChanged(nameof(MoreOptionsText));
+        this.RaisePropertyChanged(nameof(UpdateWithZipFileText));
+        this.RaisePropertyChanged(nameof(ResetPasswordText));
         this.RaisePropertyChanged(nameof(LanguageLabel));
         ApplyCurrentStatusText();
     }
@@ -241,10 +247,10 @@ public class ServerControlViewModel : ViewModelBase
             {
                 var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
                 {
-                    Title = "Select ZIP File",
+                    Title = Resources.Picker_SelectZipFile,
                     FileTypeFilter = new[]
                     {
-                        new FilePickerFileType("ZIP Files")
+                        new FilePickerFileType(Resources.Picker_ZipFiles)
                         {
                             Patterns = new[] { "*.zip" }
                         }

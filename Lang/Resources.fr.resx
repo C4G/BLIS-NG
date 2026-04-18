@@ -108,5 +108,20 @@
 <data name="Message_RestartRequired" xml:space="preserve">
   <value>Langue mise à jour. Redémarrez le lanceur pour appliquer tous les changements de texte.</value>
 </data>
+<data name="Button_MoreOptions" xml:space="preserve">
+  <value>Plus d'options</value>
+</data>
+<data name="Menu_UpdateWithZipFile" xml:space="preserve">
+  <value>Mettre à jour avec un fichier ZIP</value>
+</data>
+<data name="Menu_ResetPassword" xml:space="preserve">
+  <value>Réinitialiser le mot de passe</value>
+</data>
+<data name="Picker_SelectZipFile" xml:space="preserve">
+  <value>Sélectionner un fichier ZIP</value>
+</data>
+<data name="Picker_ZipFiles" xml:space="preserve">
+  <value>Fichiers ZIP</value>
+</data>
 
 </root>
