@@ -35,6 +35,9 @@ public partial class App : Application
             .WriteTo.File(Path.Combine(ConfigurationFile.ResolveBaseDirectory(), "log", "blis_ng_.log"), rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
+        // Clean up leftover artifacts from a previous self-update (old exe + staging dir)
+        UpdateProgressViewModel.StartupCleanup();
+
         var collection = new ServiceCollection()
             .AddLogging(builder => builder.AddSerilog(dispose: true))
             // See Lib/ServiceCollectionExtensions.cs to see the dependency injection entrypoint.
