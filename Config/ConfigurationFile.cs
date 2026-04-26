@@ -47,15 +47,15 @@ public abstract class ConfigurationFile
         this.templatePath = templatePath;
 
         BASE_DIR = ResolveBaseDirectory();
-        SERVER_BASE_DIR = Path.Combine(BASE_DIR, "server");
+        SERVER_BASE_DIR = Path.Join(BASE_DIR, "server");
 
-        TMP_DIR = Path.Combine(SERVER_BASE_DIR, "tmp");
+        TMP_DIR = Path.Join(SERVER_BASE_DIR, "tmp");
         if (!Path.Exists(TMP_DIR))
         {
             Directory.CreateDirectory(TMP_DIR);
         }
 
-        LOG_DIR = Path.Combine(BASE_DIR, "log");
+        LOG_DIR = Path.Join(BASE_DIR, "log");
         if (!Path.Exists(LOG_DIR))
         {
             Directory.CreateDirectory(LOG_DIR);

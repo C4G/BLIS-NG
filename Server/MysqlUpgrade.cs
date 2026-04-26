@@ -9,7 +9,7 @@ namespace BLIS_NG.Server;
 /// </summary>
 public class MySqlUpgrade(ILogger<MySqlUpgrade> logger, MySqlIni mySqlIni) : BaseProcess(nameof(MySqlUpgrade), logger, singleton: false)
 {
-    public readonly string MysqlUpgradePath = Path.Combine(
+    public readonly string MysqlUpgradePath = Path.Join(
       mySqlIni.SERVER_BASE_DIR, "mysql", "bin", "mysql_upgrade.exe");
 
     private readonly ILogger<MySqlUpgrade> logger = logger;

@@ -19,7 +19,7 @@ public class StateFile
     /// </summary>
     public static StateFile Load(string baseDir)
     {
-        var path = Path.Combine(baseDir, FileName);
+        var path = Path.Join(baseDir, FileName);
         if (!File.Exists(path))
         {
             return new StateFile();
@@ -41,7 +41,7 @@ public class StateFile
     /// </summary>
     public void Save(string baseDir)
     {
-        var path = Path.Combine(baseDir, FileName);
+        var path = Path.Join(baseDir, FileName);
         var options = new JsonSerializerOptions { WriteIndented = true };
         var json = JsonSerializer.Serialize(this, options);
         File.WriteAllText(path, json);
@@ -60,7 +60,7 @@ public class VersionFile
     /// </summary>
     public static VersionFile? Load(string directory)
     {
-        var path = Path.Combine(directory, FileName);
+        var path = Path.Join(directory, FileName);
         if (!File.Exists(path))
         {
             return null;

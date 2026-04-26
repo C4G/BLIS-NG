@@ -16,16 +16,16 @@ public class HttpdConf : ConfigurationFile
 
     public HttpdConf() : base(new Uri("avares://BLIS-NG/Assets/Templates/httpd.conf.liquid"))
     {
-        APACHE2_BASE = Path.Combine(SERVER_BASE_DIR, "Apache");
-        CONFIG_FILE_PATH = Path.Combine(APACHE2_BASE, "conf", "httpd.conf");
+        APACHE2_BASE = Path.Join(SERVER_BASE_DIR, "Apache");
+        CONFIG_FILE_PATH = Path.Join(APACHE2_BASE, "conf", "httpd.conf");
 
         var state = StateFile.Load(BASE_DIR);
-        DOCROOT = Path.Combine(BASE_DIR, "releases", state.ActiveVersion, "htdocs");
+        DOCROOT = Path.Join(BASE_DIR, "releases", state.ActiveVersion, "htdocs");
 
-        PID_FILE = Path.Combine(TMP_DIR, "httpd.pid");
-        LOCAL_DIR = Path.Combine(BASE_DIR, "local");
-        STORAGE_DIR = Path.Combine(BASE_DIR, "storage");
-        DATA_DIR = Path.Combine(BASE_DIR, "data");
+        PID_FILE = Path.Join(TMP_DIR, "httpd.pid");
+        LOCAL_DIR = Path.Join(BASE_DIR, "local");
+        STORAGE_DIR = Path.Join(BASE_DIR, "storage");
+        DATA_DIR = Path.Join(BASE_DIR, "data");
     }
 
     public override void Write()

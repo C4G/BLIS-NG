@@ -32,7 +32,7 @@ public partial class App : Application
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .WriteTo.Debug()
-            .WriteTo.File(Path.Combine(ConfigurationFile.ResolveBaseDirectory(), "log", "blis_ng_.log"), rollingInterval: RollingInterval.Day)
+            .WriteTo.File(Path.Join(ConfigurationFile.ResolveBaseDirectory(), "log", "blis_ng_.log"), rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
         // Clean up leftover artifacts from a previous self-update (old exe + staging dir)

@@ -9,7 +9,7 @@ namespace BLIS_NG.Server;
 /// </summary>
 public class MySql(ILogger<MySql> logger, MySqlIni mySqlIni) : BaseProcess(nameof(MySql), logger, singleton: false)
 {
-    public readonly string MysqlPath = Path.Combine(
+    public readonly string MysqlPath = Path.Join(
         mySqlIni.SERVER_BASE_DIR, "mysql", "bin", "mysql.exe"
     );
 

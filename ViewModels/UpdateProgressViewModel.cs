@@ -51,7 +51,7 @@ public class UpdateProgressViewModel : ViewModelBase
             // Stage 1: Unpack ZIP
             UpdateStage(1, "Unpacking ZIP file...");
             _logger.LogInformation("Starting update from ZIP: {ZipPath}", zipPath);
-            string stagingPath = Path.Combine(baseDir, StagingDir);
+            string stagingPath = Path.Join(baseDir, StagingDir);
             string effectiveStagingPath = "";
             await Task.Run(() => effectiveStagingPath = UnpackZip(zipPath, stagingPath));
 
@@ -59,7 +59,7 @@ public class UpdateProgressViewModel : ViewModelBase
             UpdateStage(2, "Validating update package...");
             var versionFile = VersionFile.Load(effectiveStagingPath);
             string? newExeInZip = FindFileRecursive(effectiveStagingPath, ExeName);
-            string stagingServerPath = Path.Combine(effectiveStagingPath, ServerDir);
+            string stagingServerPath = Path.Join(effectiveStagingPath, ServerDir);
 
             if (versionFile == null || string.IsNullOrWhiteSpace(versionFile.Version)
                 || newExeInZip == null
@@ -98,13 +98,13 @@ public class UpdateProgressViewModel : ViewModelBase
 
             // Stage 5: Backup current server
             UpdateStage(5, "Backing up current server...");
-            string serverPath = Path.Combine(baseDir, ServerDir);
+            string serverPath = Path.Join(baseDir, ServerDir);
             if (Directory.Exists(serverPath))
             {
                 string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                string serverBackupPath = Path.Combine(baseDir, BackupsDir, $"server-{currentVersion}-{timestamp}");
+                string serverBackupPath = Path.Join(baseDir, BackupsDir, $"server-{currentVersion}-{timestamp}");
                 _logger.LogInformation("Moving current server to backup: {BackupPath}", serverBackupPath);
-                Directory.CreateDirectory(Path.Combine(baseDir, BackupsDir));
+                Directory.CreateDirectory(Path.Join(baseDir, BackupsDir));
                 Directory.Move(serverPath, serverBackupPath);
                 _logger.LogInformation("Server backup completed.");
             }
@@ -121,7 +121,7 @@ public class UpdateProgressViewModel : ViewModelBase
 
             // Stage 7: Install release files
             UpdateStage(7, "Installing release files...");
-            string releasePath = Path.Combine(baseDir, ReleasesDir, newVersion);
+            string releasePath = Path.Join(baseDir, ReleasesDir, newVersion);
             _logger.LogInformation("Copying release files to {ReleasePath}.", releasePath);
             Directory.CreateDirectory(releasePath);
 
@@ -130,14 +130,14 @@ public class UpdateProgressViewModel : ViewModelBase
                 string dirName = Path.GetFileName(dir);
                 if (string.Equals(dirName, ServerDir, StringComparison.OrdinalIgnoreCase))
                     continue;
-                CopyDirectoryRecursive(dir, Path.Combine(releasePath, dirName));
+                CopyDirectoryRecursive(dir, Path.Join(releasePath, dirName));
             }
             foreach (var file in Directory.GetFiles(effectiveStagingPath))
             {
                 string fileName = Path.GetFileName(file);
                 if (string.Equals(fileName, ExeName, StringComparison.OrdinalIgnoreCase))
                     continue;
-                File.Copy(file, Path.Combine(releasePath, fileName), overwrite: true);
+                File.Copy(file, Path.Join(releasePath, fileName), overwrite: true);
             }
             _logger.LogInformation("Release files installed.");
 
@@ -150,8 +150,8 @@ public class UpdateProgressViewModel : ViewModelBase
 
             // Stage 9: Replace executable
             UpdateStage(9, "Replacing executable...");
-            string currentExePath = Path.Combine(baseDir, ExeName);
-            string oldExePath = Path.Combine(baseDir, OldExeName);
+            string currentExePath = Path.Join(baseDir, ExeName);
+            string oldExePath = Path.Join(baseDir, OldExeName);
             ReplaceExecutable(currentExePath, oldExePath, newExeInZip);
 
             // Stage 10: Launch new application
@@ -255,10 +255,10 @@ public class UpdateProgressViewModel : ViewModelBase
 
     private void CreateAutomatedDatabaseBackup(string baseDir)
     {
-        string dbSource = Path.Combine(baseDir, "dbdir");
-        string backupRoot = Path.Combine(baseDir, BackupsDir);
+        string dbSource = Path.Join(baseDir, "dbdir");
+        string backupRoot = Path.Join(baseDir, BackupsDir);
         string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-        string fullDestination = Path.Combine(backupRoot, $"DB_Backup_{timestamp}");
+        string fullDestination = Path.Join(backupRoot, $"DB_Backup_{timestamp}");
 
         if (Directory.Exists(dbSource))
         {
@@ -277,9 +277,9 @@ public class UpdateProgressViewModel : ViewModelBase
     {
         Directory.CreateDirectory(target);
         foreach (string file in Directory.GetFiles(source))
-            File.Copy(file, Path.Combine(target, Path.GetFileName(file)), true);
+            File.Copy(file, Path.Join(target, Path.GetFileName(file)), true);
         foreach (string dir in Directory.GetDirectories(source))
-            CopyDirectoryRecursive(dir, Path.Combine(target, Path.GetFileName(dir)));
+            CopyDirectoryRecursive(dir, Path.Join(target, Path.GetFileName(dir)));
     }
 
     /// <summary>
@@ -292,14 +292,14 @@ public class UpdateProgressViewModel : ViewModelBase
         {
             string baseDir = ConfigurationFile.ResolveBaseDirectory();
 
-            string oldExePath = Path.Combine(baseDir, OldExeName);
+            string oldExePath = Path.Join(baseDir, OldExeName);
             if (File.Exists(oldExePath))
             {
                 File.Delete(oldExePath);
                 Serilog.Log.Information("Cleaned up old executable: {Path}", oldExePath);
             }
 
-            string stagingPath = Path.Combine(baseDir, StagingDir);
+            string stagingPath = Path.Join(baseDir, StagingDir);
             if (Directory.Exists(stagingPath))
             {
                 Directory.Delete(stagingPath, recursive: true);

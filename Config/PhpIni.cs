@@ -8,13 +8,13 @@ public class PhpIni : ConfigurationFile
 
     public PhpIni() : base(new Uri("avares://BLIS-NG/Assets/Templates/php.ini.liquid"))
     {
-        PHP_BASE = Path.Combine(SERVER_BASE_DIR, "php");
-        PHP_SESSION_PATH = Path.Combine(SERVER_BASE_DIR, "session");
+        PHP_BASE = Path.Join(SERVER_BASE_DIR, "php");
+        PHP_SESSION_PATH = Path.Join(SERVER_BASE_DIR, "session");
         if (!Path.Exists(PHP_SESSION_PATH))
         {
             Directory.CreateDirectory(PHP_SESSION_PATH);
         }
-        CONFIG_FILE_PATH = Path.Combine(PHP_BASE, "php.ini");
+        CONFIG_FILE_PATH = Path.Join(PHP_BASE, "php.ini");
     }
 
     public override void Write()

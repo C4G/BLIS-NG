@@ -48,5 +48,5 @@ public static class LanguagePreferences
     }
 
     private static string GetSettingsPath() =>
-        Path.Combine(ConfigurationFile.ResolveBaseDirectory(), SettingsFileName);
+        Path.Join(ConfigurationFile.ResolveBaseDirectory(), SettingsFileName);
 }
