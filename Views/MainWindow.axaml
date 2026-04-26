@@ -1,52 +1,47 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:BLIS_NG.ViewModels"
+        xmlns:lang="using:BLIS_NG.Lang"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="360"
         x:CompileBindings="True"
-		x:DataType="vm:MainWindowViewModel"
+        x:DataType="vm:MainWindowViewModel"
         x:Class="BLIS_NG.Views.MainWindow"
-        Title="{Binding WindowTitle}"
+        Title="{Binding ServerControlViewModel.AppVersion}"
         WindowState="{Binding WindowState}"
         Padding="10"
         Height="360"
         Width="640"
         CanResize="False">
 
-	<!--We are using Compiled bindings. This is not mandatory but makes life easier. Read more about it here:-->
-	<!-- https://docs.avaloniaui.net/docs/basics/data/data-binding/compiled-bindings -->
-
-	<Design.DataContext>
+    <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-	<Grid 
-        DataContext="{Binding ServerControlViewModel}" 
+    <Grid
+        DataContext="{Binding ServerControlViewModel}"
         ColumnDefinitions="*,*,*,*,*"
         RowDefinitions="*,*,*,*,auto,*"
     >
-		<TextBlock 
-            TextAlignment="Left" 
+        <TextBlock
+            TextAlignment="Left"
             FontWeight="Normal"
             FontSize="36"
             VerticalAlignment="Center"
             Grid.Row="0"
             Grid.Column="0"
             Grid.ColumnSpan="5"
-        >
-            Basic Lab Information System (BLIS)
-        </TextBlock>
+            Text="{x:Static lang:Resources.AppTitle}"/>
 
-        <TextBlock 
-            TextAlignment="Left" 
-            FontSize="18" 
+        <TextBlock
+            TextAlignment="Left"
+            FontSize="18"
             Text="{Binding AppVersion}"
             VerticalAlignment="Top"
             Grid.Row="1"
             Grid.Column="0"
-            Grid.ColumnSpan="5"
-        />
+            Grid.ColumnSpan="5"/>
 
         <TextBlock
             FontSize="24"
@@ -56,12 +51,8 @@
             Grid.Row="2"
             Grid.Column="0"
             Grid.ColumnSpan="5"
-        >
-            A Joint Initiative of<LineBreak/>
-            C4G at Georgia Tech, the CDC, and participating countries.
-        </TextBlock>
+            Text="{x:Static lang:Resources.AppJointInitiative}"/>
 
-        
         <TextBlock
             FontSize="12"
             FontFamily="Times New Roman"
@@ -69,21 +60,17 @@
             Grid.Column="0"
             Grid.Row="3"
             Grid.ColumnSpan="5"
-        >
-            C4G BLIS has been licensed under the GNU General Public License version 3. For more information, visit blis.cc.gatech.edu.
-        </TextBlock>
+            Text="{x:Static lang:Resources.AppLicense}"/>
 
-        <Button 
+        <Button
             Width="160"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
             Grid.Row="4"
             Grid.Column="3"
             Grid.ColumnSpan="2"
-            Command="{Binding OpenPasswordResetCommand}">
-            Reset Password
-        </Button>
-
+            Command="{Binding OpenPasswordResetCommand}"
+            Content="{x:Static lang:Resources.ResetPassword}"/>
 
         <StackPanel
             Orientation="Horizontal"
@@ -92,9 +79,13 @@
             Grid.Column="0"
             Grid.ColumnSpan="5"
         >
-            <TextBlock Width="240" VerticalAlignment="Center" Text="{Binding Status}"></TextBlock>
-            <Button Width="160" Command="{Binding StartServerCommand}" IsEnabled="{Binding StartBlisEnabled}">Start BLIS</Button>
-            <Button Width="160" Command="{Binding StopServerCommand}" IsEnabled="{Binding StopBlisEnabled}">Stop BLIS</Button>
-    </StackPanel>
+            <TextBlock Width="240" VerticalAlignment="Center" Text="{Binding Status}"/>
+            <Button Width="160" Command="{Binding StartServerCommand}"
+                    IsEnabled="{Binding StartBlisEnabled}"
+                    Content="{x:Static lang:Resources.StartBlis}"/>
+            <Button Width="160" Command="{Binding StopServerCommand}"
+                    IsEnabled="{Binding StopBlisEnabled}"
+                    Content="{x:Static lang:Resources.StopBlis}"/>
+        </StackPanel>
     </Grid>
 </Window>
