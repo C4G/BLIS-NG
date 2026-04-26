@@ -19,7 +19,7 @@ public class MainWindowViewModel : ViewModelBase
         // BLIS doesn't (yet) run on non-Windows platforms,
         // so don't attempt to open it in the browser if we're not
         // on Windows.
-        if (false && OperatingSystem.IsWindows())
+        if (OperatingSystem.IsWindows())
         {
             // Start BLIS on app start
             ServerControlViewModel.HandleStartButtonClick();
