@@ -7,24 +7,14 @@ using Avalonia.Platform.Storage;
 using BLIS_NG.Server;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
-using System.IO;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using BLIS_NG.Lang;
 
 namespace BLIS_NG.ViewModels;
 
-public class LanguageOption
+public class LanguageOption(string code, string displayName)
 {
-    public string Code { get; }
-    public string DisplayName { get; }
-
-    public LanguageOption(string code, string displayName)
-    {
-        Code = code;
-        DisplayName = displayName;
-    }
+    public string Code { get; } = code;
+    public string DisplayName { get; } = displayName;
 }
 
 public class ServerControlViewModel : ViewModelBase
@@ -40,16 +30,16 @@ public class ServerControlViewModel : ViewModelBase
     }
 
     private const string AppVersionNumber = "4.0";
-    public string AppVersion => string.Format(Resources.App_Version_Format, AppVersionNumber);
-    public string AppTitle => Resources.App_Title;
-    public string AppTagline => Resources.App_Tagline;
-    public string AppLicenseNotice => Resources.App_LicenseNotice;
-    public string StartBlisText => Resources.Button_StartBlis;
-    public string StopBlisText => Resources.Button_StopBlis;
-    public string MoreOptionsText => Resources.Button_MoreOptions;
-    public string UpdateWithZipFileText => Resources.Menu_UpdateWithZipFile;
-    public string ResetPasswordText => Resources.Menu_ResetPassword;
-    public string LanguageLabel => Resources.Label_Language;
+    public static string AppVersion => string.Format(Resources.App_Version_Format, AppVersionNumber);
+    public static string AppTitle => Resources.App_Title;
+    public static string AppTagline => Resources.App_Tagline;
+    public static string AppLicenseNotice => Resources.App_LicenseNotice;
+    public static string StartBlisText => Resources.Button_StartBlis;
+    public static string StopBlisText => Resources.Button_StopBlis;
+    public static string MoreOptionsText => Resources.Button_MoreOptions;
+    public static string UpdateWithZipFileText => Resources.Menu_UpdateWithZipFile;
+    public static string ResetPasswordText => Resources.Menu_ResetPassword;
+    public static string LanguageLabel => Resources.Label_Language;
 
     private readonly ILogger<ServerControlViewModel> logger;
     private readonly ILoggerFactory _loggerFactory;
@@ -63,7 +53,17 @@ public class ServerControlViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SelectZipCommand { get; }
     public IReadOnlyList<LanguageOption> AvailableLanguages { get; }
 
-    private bool _initializingLanguageSelection = true;
+    public static bool SelfUpdateEnabled
+    {
+        get =>
+#if SelfUpdateEnabled
+            true;
+#else
+            false;
+#endif
+    }
+
+    private readonly bool _initializingLanguageSelection = true;
     private UiStatusState _currentStatusState = UiStatusState.Stopped;
 
     private string _status = string.Empty;
@@ -117,8 +117,7 @@ public class ServerControlViewModel : ViewModelBase
         ILoggerFactory loggerFactory,
         IMainServer mainServer,
         IClassicDesktopStyleApplicationLifetime lifetime,
-        ToolsWindowViewModel toolsWindowViewModel,
-        MySqlAdmin mySqlAdmin)
+        ToolsWindowViewModel toolsWindowViewModel)
     {
         this.logger = logger;
         _loggerFactory = loggerFactory;
@@ -131,11 +130,11 @@ public class ServerControlViewModel : ViewModelBase
         OpenPasswordResetCommand = ReactiveCommand.Create(HandleOpenPasswordReset);
         SelectZipCommand = ReactiveCommand.CreateFromTask(HandleSelectZipClick);
 
-        AvailableLanguages = new List<LanguageOption>
-        {
+        AvailableLanguages =
+        [
             new("en", "English"),
             new("fr", "Francais"),
-        };
+        ];
 
         var savedLanguageCode = LanguagePreferences.GetLanguageCode();
         SelectedLanguage = AvailableLanguages.FirstOrDefault(x => x.Code == savedLanguageCode) ?? AvailableLanguages[0];
@@ -252,13 +251,13 @@ public class ServerControlViewModel : ViewModelBase
                 var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
                 {
                     Title = Resources.Picker_SelectZipFile,
-                    FileTypeFilter = new[]
-                    {
+                    FileTypeFilter =
+                    [
                         new FilePickerFileType(Resources.Picker_ZipFiles)
                         {
-                            Patterns = new[] { "*.zip" }
+                            Patterns = ["*.zip"]
                         }
-                    },
+                    ],
                     AllowMultiple = false
                 });
 
@@ -267,7 +266,7 @@ public class ServerControlViewModel : ViewModelBase
                     string selectedFile = files[0].Path.LocalPath;
 
                     // Launch the update window logic
-                    var updateLogger = Microsoft.Extensions.Logging.LoggerFactoryExtensions
+                    var updateLogger = LoggerFactoryExtensions
                         .CreateLogger<UpdateProgressViewModel>(_loggerFactory);
                     var updateVm = new UpdateProgressViewModel(updateLogger, mainServer);
                     var updateWindow = new Views.UpdateProgressWindow
@@ -293,7 +292,7 @@ public class ServerControlViewModel : ViewModelBase
     {
         if (_lifetime.MainWindow is null) return;
         _toolsWindowViewModel.PasswordResetViewModel.ResetForm();
-        var toolsWindow = new BLIS_NG.Views.ToolsWindow(_toolsWindowViewModel);
+        var toolsWindow = new Views.ToolsWindow(_toolsWindowViewModel);
         //close window action after successful reset
         _toolsWindowViewModel.PasswordResetViewModel.RequestClose = () => toolsWindow.Close();
         toolsWindow.ShowDialog(_lifetime.MainWindow);

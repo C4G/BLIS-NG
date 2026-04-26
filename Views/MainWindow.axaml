@@ -14,16 +14,20 @@
     Width="640"
     CanResize="False">
 
-    <!--We
-    are using Compiled bindings. This is not mandatory but makes life easier. Read more about it
-    here:-->
+    <!--
+    We are using Compiled bindings. This is not mandatory but makes life easier. 
+    Read more about it here:
+    -->
     <!-- https://docs.avaloniaui.net/docs/basics/data/data-binding/compiled-bindings -->
 
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-	<Grid
+    <!-- 
+    ShowGridLines="true" can be added below to make debugging easier.
+    -->
+    <Grid
         DataContext="{Binding ServerControlViewModel}"
         ColumnDefinitions="*"
         RowDefinitions="Auto,Auto,Auto,Auto,*,Auto"
@@ -70,49 +74,51 @@
             Grid.Row="3"
         />
 
-        <Grid
-            Grid.Row="5"
-            Grid.Column="0"
-            Margin="0,12,0,0"
-            RowDefinitions="Auto,Auto"
-            RowSpacing="8"
-        >
-            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center" Grid.Row="0">
-                <TextBlock VerticalAlignment="Center" Text="{Binding LanguageLabel}" />
-                <ComboBox Width="110"
-                          ItemsSource="{Binding AvailableLanguages}"
-                          SelectedItem="{Binding SelectedLanguage}">
+        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center"
+            Grid.Row="4">
+            <TextBlock VerticalAlignment="Center"
+                Text="{Binding Status}" />
+        </StackPanel>
+
+        <Panel Grid.Row="5">
+            <ComboBox Width="110"
+                HorizontalAlignment="Left"
+                ItemsSource="{Binding AvailableLanguages}"
+                SelectedItem="{Binding SelectedLanguage}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding DisplayName}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-                <TextBlock VerticalAlignment="Center"
-                           Text="{Binding Status}" />
-            </StackPanel>
 
-            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" HorizontalAlignment="Right">
+            <StackPanel Grid.Row="5" Orientation="Horizontal" Spacing="10"
+                VerticalAlignment="Center" HorizontalAlignment="Right">
+
                 <Button Width="110" Height="40"
-                        Command="{Binding StartServerCommand}"
-                        IsEnabled="{Binding StartBlisEnabled}"
-                        Content="{Binding StartBlisText}" />
+                    Command="{Binding StartServerCommand}"
+                    IsEnabled="{Binding StartBlisEnabled}"
+                    Content="{Binding StartBlisText}"
+                    VerticalContentAlignment="Center" />
                 <Button Width="110" Height="40"
-                        Command="{Binding StopServerCommand}"
-                        IsEnabled="{Binding StopBlisEnabled}"
-                        Content="{Binding StopBlisText}" />
-                <Button Content="{Binding MoreOptionsText}" Width="110" Height="40" VerticalContentAlignment="Center">
+                    Command="{Binding StopServerCommand}"
+                    IsEnabled="{Binding StopBlisEnabled}"
+                    Content="{Binding StopBlisText}"
+                    VerticalContentAlignment="Center" />
+                <DropDownButton Content="{Binding MoreOptionsText}" Width="150" Height="40"
+                    VerticalContentAlignment="Center">
                     <Button.Flyout>
                         <MenuFlyout Placement="Bottom">
                             <MenuItem Header="{Binding UpdateWithZipFileText}"
-                                      Command="{Binding SelectZipCommand}" />
-                            <Separator />
+                                Command="{Binding SelectZipCommand}"
+                                IsVisible="{Binding SelfUpdateEnabled}" />
+                            <Separator IsVisible="{Binding SelfUpdateEnabled}" />
                             <MenuItem Header="{Binding ResetPasswordText}"
-                                      Command="{Binding OpenPasswordResetCommand}" />
+                                Command="{Binding OpenPasswordResetCommand}" />
                         </MenuFlyout>
                     </Button.Flyout>
-                </Button>
+                </DropDownButton>
             </StackPanel>
-        </Grid>
+        </Panel>
     </Grid>
 </Window>

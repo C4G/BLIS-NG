@@ -34,25 +34,29 @@
 
               <StackPanel Spacing="4">
                 <TextBlock>Username to Reset</TextBlock>
-                <TextBox Text="{Binding Username}" Watermark="Enter username"/>
-              </StackPanel>
+                                <TextBox Text="{Binding Username}" PlaceholderText="Enter username" />
+                            </StackPanel>
 
-              <!-- Password requirements box -->
-              <Border Background="#E3F2FD" CornerRadius="4" Padding="10">
-                <StackPanel Spacing="4">
-                  <TextBlock FontWeight="SemiBold" Foreground="#0D47A1">Password Requirements</TextBlock>
-                  <TextBlock Foreground="#1565C0" FontSize="12">• At least 20 characters</TextBlock>
-                  <TextBlock Foreground="#1565C0" FontSize="12">• At least 2 of: uppercase, lowercase, numbers, symbols</TextBlock>
-                  <TextBlock Foreground="#1565C0" FontSize="12">• Example symbol characters: ! @ # $ % ^ &amp; *</TextBlock>
-                </StackPanel>
-              </Border>
+                            <!-- Password requirements box -->
+                            <Border Background="#E3F2FD" CornerRadius="4" Padding="10">
+                                <StackPanel Spacing="4">
+                                    <TextBlock FontWeight="SemiBold" Foreground="#0D47A1">Password
+                                        Requirements</TextBlock>
+                                    <TextBlock Foreground="#1565C0" FontSize="12">• At least 20
+                                        characters</TextBlock>
+                                    <TextBlock Foreground="#1565C0" FontSize="12">• At least 2 of:
+                                        uppercase, lowercase, numbers, symbols</TextBlock>
+                                    <TextBlock Foreground="#1565C0" FontSize="12">• Example symbol
+                                        characters: ! @ # $ % ^ &amp; *</TextBlock>
+                                </StackPanel>
+                            </Border>
 
-              <StackPanel Spacing="4">
-                <TextBlock>New Password</TextBlock>
-                <TextBox Text="{Binding NewPassword}" PasswordChar="●"
-                         Watermark="Enter new password (min. 20 chars)"/>
+                            <StackPanel Spacing="4">
+                                <TextBlock>New Password</TextBlock>
+                                <TextBox Text="{Binding NewPassword}" PasswordChar="●"
+                                    PlaceholderText="Enter new password (min. 20 chars)" />
 
-                <!-- Strength meter -->
+                                <!-- Strength meter -->
                 <StackPanel Spacing="2" IsVisible="{Binding NewPassword, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                   <Grid ColumnDefinitions="*,Auto">
                     <Border Grid.Column="0" Background="#E0E0E0" CornerRadius="3" Height="6">
@@ -72,12 +76,12 @@
               <StackPanel Spacing="4">
                 <TextBlock>Confirm Password</TextBlock>
                 <TextBox Text="{Binding ConfirmPassword}" PasswordChar="●"
-                         Watermark="Confirm new password"/>
+                                    PlaceholderText="Confirm new password" />
               </StackPanel>
 
             </StackPanel>
 
-            <!-- Step 2: Supervisor verification -->
+                        <!-- Step 2: Supervisor verification -->
             <StackPanel Spacing="10" IsVisible="{Binding IsStep2Visible}">
               <Border Background="#FFF8E1" CornerRadius="4" Padding="10">
                 <TextBlock TextWrapping="Wrap" Foreground="#7B5800" FontStyle="Italic">
@@ -87,22 +91,22 @@
               <StackPanel Spacing="4">
                 <TextBlock>Supervisor Username</TextBlock>
                 <TextBox Text="{Binding SupervisorUsername}"
-                         Watermark="Enter supervisor username"/>
+                                    PlaceholderText="Enter supervisor username" />
               </StackPanel>
               <StackPanel Spacing="4">
                 <TextBlock>Supervisor Password</TextBlock>
                 <TextBox Text="{Binding SupervisorPassword}" PasswordChar="●"
-                         Watermark="Enter supervisor password"/>
+                                    PlaceholderText="Enter supervisor password" />
               </StackPanel>
             </StackPanel>
 
-            <!-- Feedback -->
+                        <!-- Feedback -->
             <TextBlock Foreground="Red" Text="{Binding ErrorMessage}"
                        IsVisible="{Binding HasError}" TextWrapping="Wrap"/>
             <TextBlock Foreground="Green" Text="{Binding SuccessMessage}"
                        IsVisible="{Binding HasSuccess}" TextWrapping="Wrap"/>
 
-            <!-- Action buttons -->
+                        <!-- Action buttons -->
             <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
               <Button Width="120" Command="{Binding ProceedToVerifyCommand}"
                       IsVisible="{Binding IsStep1Visible}">Next →</Button>

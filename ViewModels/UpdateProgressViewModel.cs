@@ -66,7 +66,7 @@ public class UpdateProgressViewModel : ViewModelBase
                 || !Directory.Exists(stagingServerPath))
             {
                 _logger.LogError("Update ZIP is missing required files. version.json={HasVersion}, {ExeName}={HasExe}, server/={HasServer}",
-                    versionFile?.Version != null, newExeInZip != null, Directory.Exists(stagingServerPath));
+                    versionFile?.Version != null, ExeName, newExeInZip != null, Directory.Exists(stagingServerPath));
                 ShowError("Update Failed: Incompatible Update ZIP File");
                 return;
             }

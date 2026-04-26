@@ -1,13 +1,6 @@
 namespace BLIS_NG.ViewModels;
 
-public class ToolsWindowViewModel : ViewModelBase
+public class ToolsWindowViewModel(PasswordResetViewModel passwordResetViewModel) : ViewModelBase
 {
-    public PasswordResetViewModel PasswordResetViewModel { get; }
-
-    // Future: public UpdateViewModel UpdateViewModel { get; }
-
-    public ToolsWindowViewModel(PasswordResetViewModel passwordResetViewModel)
-    {
-        PasswordResetViewModel = passwordResetViewModel;
-    }
+    public PasswordResetViewModel PasswordResetViewModel { get; } = passwordResetViewModel;
 }
