@@ -3,7 +3,6 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using BLIS_NG.Config;
 using BLIS_NG.Lib;
-using BLIS_NG.Lang;
 using BLIS_NG.ViewModels;
 using BLIS_NG.Views;
 using Microsoft.Extensions.DependencyInjection;
