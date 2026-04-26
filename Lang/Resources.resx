@@ -29,7 +29,7 @@
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="name" use="required" type="xsd:string" />
               <xsd:attribute name="type" type="xsd:string" />
               <xsd:attribute name="mimetype" type="xsd:string" />
               <xsd:attribute ref="xml:space" />
@@ -40,14 +40,13 @@
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="name" use="required" type="xsd:string" />
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -63,6 +62,7 @@
       Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 
+  <!-- ── MainWindow ── -->
   <data name="App_Title" xml:space="preserve">
     <value>Basic Lab Information System (BLIS)</value>
   </data>
@@ -83,14 +83,116 @@ For more information, visit blis.cc.gatech.edu.</value>
   <data name="Button_StopBlis" xml:space="preserve">
     <value>Stop BLIS</value>
   </data>
+
+  <data name="AppTitle" xml:space="preserve">
+    <value>Basic Lab Information System (BLIS)</value>
+  </data>
+  <data name="AppJointInitiative" xml:space="preserve">
+    <value>A Joint Initiative of C4G at Georgia Tech, the CDC, and participating countries.</value>
+  </data>
+  <data name="AppLicense" xml:space="preserve">
+    <value>C4G BLIS has been licensed under the GNU General Public License version 3. For more information, visit blis.cc.gatech.edu.</value>
+  </data>
+  <data name="StartBlis" xml:space="preserve">
+    <value>Start BLIS</value>
+  </data>
+  <data name="StopBlis" xml:space="preserve">
+    <value>Stop BLIS</value>
+  </data>
+
+  <!-- ── ToolsWindow ── -->
+  <data name="ToolsWindowTitle" xml:space="preserve">
+    <value>BLIS Tools</value>
+  </data>
+  <data name="TabPasswordReset" xml:space="preserve">
+    <value>Password Reset</value>
+  </data>
+  <data name="ResetUserPassword" xml:space="preserve">
+    <value>Reset User Password</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Reset Password</value>
+  </data>
+  <data name="UsernameToReset" xml:space="preserve">
+    <value>Username to Reset</value>
+  </data>
+  <data name="EnterUsername" xml:space="preserve">
+    <value>Enter username</value>
+  </data>
+  <data name="PasswordRequirements" xml:space="preserve">
+    <value>Password Requirements</value>
+  </data>
+  <data name="PasswordReqLength" xml:space="preserve">
+    <value>• At least 20 characters</value>
+  </data>
+  <data name="PasswordReqClasses" xml:space="preserve">
+    <value>• At least 2 of: uppercase, lowercase, numbers, symbols</value>
+  </data>
+  <data name="PasswordReqSymbols" xml:space="preserve">
+    <value>• Example symbol characters: ! @ # $ % ^ &amp; *</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>New Password</value>
+  </data>
+  <data name="EnterNewPassword" xml:space="preserve">
+    <value>Enter new password (min. 20 chars)</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Confirm Password</value>
+  </data>
+  <data name="ConfirmNewPassword" xml:space="preserve">
+    <value>Confirm new password</value>
+  </data>
+  <data name="SupervisorAuthNotice" xml:space="preserve">
+    <value>A higher-ranked user must authorize this password reset.</value>
+  </data>
+  <data name="SupervisorUsername" xml:space="preserve">
+    <value>Supervisor Username</value>
+  </data>
+  <data name="EnterSupervisorUsername" xml:space="preserve">
+    <value>Enter supervisor username</value>
+  </data>
+  <data name="SupervisorPassword" xml:space="preserve">
+    <value>Supervisor Password</value>
+  </data>
+  <data name="EnterSupervisorPassword" xml:space="preserve">
+    <value>Enter supervisor password</value>
+  </data>
+  <data name="ButtonNext" xml:space="preserve">
+    <value>Next →</value>
+  </data>
+  <data name="ButtonBack" xml:space="preserve">
+    <value>← Back</value>
+  </data>
+  <data name="ButtonConfirmReset" xml:space="preserve">
+    <value>Confirm Reset</value>
+  </data>
+  <data name="ButtonResetForm" xml:space="preserve">
+    <value>Reset Form</value>
+  </data>
+
+  <!-- ── PasswordResetDialog ── -->
+  <data name="Username" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="EnterNewPasswordShort" xml:space="preserve">
+    <value>Enter new password</value>
+  </data>
+  <data name="ButtonReset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="ButtonCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+
+  <data name="Status_ApacheHealthcheckFailed" xml:space="preserve">
+    <value>Status: Apache2 health check failed.</value>
+  </data>
   <data name="Status_Healthy" xml:space="preserve">
     <value>Status: Healthy</value>
   </data>
   <data name="Status_Starting" xml:space="preserve">
     <value>Status: Starting</value>
-  </data>
-  <data name="Status_ApacheHealthcheckFailed" xml:space="preserve">
-    <value>Status: Apache2 health check failed.</value>
   </data>
   <data name="Status_Stopping" xml:space="preserve">
     <value>Status: Stopping</value>
@@ -123,6 +225,7 @@ For more information, visit blis.cc.gatech.edu.</value>
     <value>Select ZIP File</value>
   </data>
   <data name="Picker_ZipFiles" xml:space="preserve">
-    <value>ZIP Files</value>
+  <value>ZIP Files</value>
   </data>
+
 </root>
