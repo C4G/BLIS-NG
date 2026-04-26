@@ -25,7 +25,6 @@ public class MySqlAdmin(ILogger<MySqlAdmin> logger, MySqlIni mySqlIni) : BasePro
 
     public async Task<bool> Ping()
     {
-        // Not logging stdout here since it will just fill up logs.
         var result = await Execute(MysqlAdminPath, $"{baseArguments} ping", null, null, null);
         return result.ExitCode == 0;
     }
@@ -36,6 +35,4 @@ public class MySqlAdmin(ILogger<MySqlAdmin> logger, MySqlIni mySqlIni) : BasePro
             (stdout) => logger.LogInformation("{Message}", stdout),
             (stderr) => logger.LogWarning("{Message}", stderr));
     }
-
-
 }
