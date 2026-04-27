@@ -14,6 +14,15 @@ public class StateFile
     [JsonPropertyName("previous_version")]
     public string? PreviousVersion { get; set; }
 
+    [JsonPropertyName("docroot")]
+    public string? Docroot { get; set; }
+
+    [JsonIgnore]
+    public string EffectiveDocroot
+    {
+        get => string.IsNullOrEmpty(Docroot) ? $"releases/{ActiveVersion}/htdocs" : Docroot;
+    }
+
     /// <summary>
     /// Reads state.json from the base directory. Returns defaults if the file is missing or invalid.
     /// </summary>

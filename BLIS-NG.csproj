@@ -23,7 +23,7 @@
     <TrimMode>copyused</TrimMode>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <!-- 
       Self-update is enabled _only_ in debug builds right now;
       Define the constant in Release configurations as well to enable everywhere. 

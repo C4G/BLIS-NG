@@ -20,7 +20,7 @@ public class HttpdConf : ConfigurationFile
         CONFIG_FILE_PATH = Path.Join(APACHE2_BASE, "conf", "httpd.conf");
 
         var state = StateFile.Load(BASE_DIR);
-        DOCROOT = Path.Join(BASE_DIR, "releases", state.ActiveVersion, "htdocs");
+        DOCROOT = Path.Join(BASE_DIR, state.EffectiveDocroot);
 
         PID_FILE = Path.Join(TMP_DIR, "httpd.pid");
         LOCAL_DIR = Path.Join(BASE_DIR, "local");
