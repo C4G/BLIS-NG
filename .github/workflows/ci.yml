@@ -17,7 +17,7 @@ jobs:
         with:
           dotnet-version: "10.x"
           cache: true
-      - run: dotnet publish -r win-x64 -c Release
+      - run: dotnet publish -r win-x64 -c Release /WarnAsError
       - uses: actions/upload-artifact@v7
         with:
           name: blis-ng-exe

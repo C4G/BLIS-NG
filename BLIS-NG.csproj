@@ -23,6 +23,14 @@
     <TrimMode>copyused</TrimMode>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <!-- 
+      Self-update is enabled _only_ in debug builds right now;
+      Define the constant in Release configurations as well to enable everywhere. 
+    -->
+    <DefineConstants>SelfUpdateEnabled</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
@@ -53,8 +61,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="12.0.0" />
-    <PackageReference Include="Avalonia.Desktop" Version="12.0.0" />
+    <PackageReference Include="Avalonia" Version="12.0.1" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.0.1" />
     <!--
       Condition
       below is needed to remove Avalonia.Diagnostics package from build output in Release
@@ -63,7 +71,7 @@
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics"
       Version="11.3.13" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.9" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.0" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.1" />
     <PackageReference Include="Fluid.Core" Version="2.31.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.5" />
