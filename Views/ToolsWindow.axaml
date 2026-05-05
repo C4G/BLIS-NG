@@ -1,13 +1,14 @@
 <Window xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:BLIS_NG.ViewModels"
+    xmlns:lang="using:BLIS_NG.Lang"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="600"
     x:CompileBindings="True"
     x:DataType="vm:ToolsWindowViewModel"
     x:Class="BLIS_NG.Views.ToolsWindow"
-    Title="BLIS Tools"
+    Title="{x:Static lang:Resources.ToolsWindowTitle}"
     Width="480"
     Height="620"
     CanResize="False"
@@ -16,45 +17,48 @@
     <DockPanel>
 
         <Border DockPanel.Dock="Top" Background="#005A9C" Padding="16 12">
-            <TextBlock Foreground="White" FontSize="16" FontWeight="SemiBold">BLIS Tools</TextBlock>
+            <TextBlock Foreground="White" FontSize="16" FontWeight="SemiBold"
+                Text="{x:Static lang:Resources.ToolsWindowTitle}" />
         </Border>
 
         <TabControl>
 
-            <!-- ── Password Reset Tab ── -->
-            <TabItem Header="Password Reset">
+            <!-- Password Reset Tab -->
+            <TabItem Header="{x:Static lang:Resources.TabPasswordReset}">
                 <ScrollViewer>
                     <StackPanel Margin="20" Spacing="12"
                         DataContext="{Binding PasswordResetViewModel}">
 
-                        <TextBlock FontSize="16" FontWeight="Bold">Reset User Password</TextBlock>
+                        <TextBlock FontSize="16" FontWeight="Bold"
+                            Text="{x:Static lang:Resources.ResetUserPassword}" />
 
                         <!-- Step 1: Target user details -->
                         <StackPanel Spacing="10" IsVisible="{Binding IsStep1Visible}">
 
                             <StackPanel Spacing="4">
-                                <TextBlock>Username to Reset</TextBlock>
-                                <TextBox Text="{Binding Username}" PlaceholderText="Enter username" />
+                                <TextBlock Text="{x:Static lang:Resources.UsernameToReset}" />
+                                <TextBox Text="{Binding Username}"
+                                    PlaceholderText="{x:Static lang:Resources.EnterUsername}" />
                             </StackPanel>
 
                             <!-- Password requirements box -->
                             <Border Background="#E3F2FD" CornerRadius="4" Padding="10">
                                 <StackPanel Spacing="4">
-                                    <TextBlock FontWeight="SemiBold" Foreground="#0D47A1">Password
-                                        Requirements</TextBlock>
-                                    <TextBlock Foreground="#1565C0" FontSize="12">• At least 20
-                                        characters</TextBlock>
-                                    <TextBlock Foreground="#1565C0" FontSize="12">• At least 2 of:
-                                        uppercase, lowercase, numbers, symbols</TextBlock>
-                                    <TextBlock Foreground="#1565C0" FontSize="12">• Example symbol
-                                        characters: ! @ # $ % ^ &amp; *</TextBlock>
+                                    <TextBlock FontWeight="SemiBold" Foreground="#0D47A1"
+                                        Text="{x:Static lang:Resources.PasswordRequirements}" />
+                                    <TextBlock Foreground="#1565C0" FontSize="12"
+                                        Text="{x:Static lang:Resources.PasswordReqLength}" />
+                                    <TextBlock Foreground="#1565C0" FontSize="12"
+                                        Text="{x:Static lang:Resources.PasswordReqClasses}" />
+                                    <TextBlock Foreground="#1565C0" FontSize="12"
+                                        Text="{x:Static lang:Resources.PasswordReqSymbols}" />
                                 </StackPanel>
                             </Border>
 
                             <StackPanel Spacing="4">
-                                <TextBlock>New Password</TextBlock>
+                                <TextBlock Text="{x:Static lang:Resources.NewPassword}" />
                                 <TextBox Text="{Binding NewPassword}" PasswordChar="●"
-                                    PlaceholderText="Enter new password (min. 20 chars)" />
+                                    PlaceholderText="{x:Static lang:Resources.EnterNewPassword}" />
 
                                 <!-- Strength meter -->
                                 <StackPanel Spacing="2"
@@ -76,9 +80,9 @@
                             </StackPanel>
 
                             <StackPanel Spacing="4">
-                                <TextBlock>Confirm Password</TextBlock>
+                                <TextBlock Text="{x:Static lang:Resources.ConfirmPassword}" />
                                 <TextBox Text="{Binding ConfirmPassword}" PasswordChar="●"
-                                    PlaceholderText="Confirm new password" />
+                                    PlaceholderText="{x:Static lang:Resources.ConfirmNewPassword}" />
                             </StackPanel>
 
                         </StackPanel>
@@ -87,19 +91,18 @@
                         <StackPanel Spacing="10" IsVisible="{Binding IsStep2Visible}">
                             <Border Background="#FFF8E1" CornerRadius="4" Padding="10">
                                 <TextBlock TextWrapping="Wrap" Foreground="#7B5800"
-                                    FontStyle="Italic">
-                                    A higher-ranked user must authorize this password reset.
-                                </TextBlock>
+                                    FontStyle="Italic"
+                                    Text="{x:Static lang:Resources.SupervisorAuthNotice}" />
                             </Border>
                             <StackPanel Spacing="4">
-                                <TextBlock>Supervisor Username</TextBlock>
+                                <TextBlock Text="{x:Static lang:Resources.SupervisorUsername}" />
                                 <TextBox Text="{Binding SupervisorUsername}"
-                                    PlaceholderText="Enter supervisor username" />
+                                    PlaceholderText="{x:Static lang:Resources.EnterSupervisorUsername}" />
                             </StackPanel>
                             <StackPanel Spacing="4">
-                                <TextBlock>Supervisor Password</TextBlock>
+                                <TextBlock Text="{x:Static lang:Resources.SupervisorPassword}" />
                                 <TextBox Text="{Binding SupervisorPassword}" PasswordChar="●"
-                                    PlaceholderText="Enter supervisor password" />
+                                    PlaceholderText="{x:Static lang:Resources.EnterSupervisorPassword}" />
                             </StackPanel>
                         </StackPanel>
 
@@ -113,16 +116,22 @@
                         <StackPanel Orientation="Horizontal" Spacing="10"
                             HorizontalAlignment="Right">
                             <Button Width="120" Command="{Binding ProceedToVerifyCommand}"
-                                IsVisible="{Binding IsStep1Visible}">Next →</Button>
+                                IsVisible="{Binding IsStep1Visible}"
+                                Content="{x:Static lang:Resources.ButtonNext}" />
                             <Button Width="80" Command="{Binding BackCommand}"
-                                IsVisible="{Binding IsStep2Visible}">← Back</Button>
+                                IsVisible="{Binding IsStep2Visible}"
+                                Content="{x:Static lang:Resources.ButtonBack}" />
                             <Button Width="130" Command="{Binding ConfirmResetCommand}"
-                                IsVisible="{Binding IsStep2Visible}">Confirm Reset</Button>
-                            <Button Width="100" Command="{Binding CancelCommand}">Reset Form</Button>
+                                IsVisible="{Binding IsStep2Visible}"
+                                Content="{x:Static lang:Resources.ButtonConfirmReset}" />
+                            <Button Width="100" Command="{Binding CancelCommand}"
+                                Content="{x:Static lang:Resources.ButtonResetForm}" />
                         </StackPanel>
+
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
+
         </TabControl>
     </DockPanel>
 </Window>
