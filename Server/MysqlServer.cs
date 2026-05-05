@@ -21,8 +21,8 @@ public class MySqlServer : BaseProcess
         this.mySqlAdmin = mySqlAdmin;
         this.mySqlUpgrade = mySqlUpgrade;
 
-        MysqldPath = Path.Combine(mySqlIni.SERVER_BASE_DIR, "mysql", "bin", "mysqld.exe");
-        DataDir = Path.Combine(mySqlIni.BASE_DIR, "dbdir");
+        MysqldPath = Path.Join(mySqlIni.SERVER_BASE_DIR, "mysql", "bin", "mysqld.exe");
+        DataDir = Path.Join(mySqlIni.BASE_DIR, "dbdir");
 
         Arguments = $"--defaults-file=\"{mySqlIni.CONFIG_FILE_PATH}\" --console --datadir=\"{DataDir}\"";
 
@@ -52,7 +52,7 @@ public class MySqlServer : BaseProcess
 
     private bool UpgradeRequired()
     {
-        if (!File.Exists(Path.Combine(DataDir, "mysql", "plugin.frm")))
+        if (!File.Exists(Path.Join(DataDir, "mysql", "plugin.frm")))
         {
             logger.LogWarning("mysql/plugin.frm (mysql.plugin table) does not exist. Attempting to upgrade MySQL database.");
             return true;
