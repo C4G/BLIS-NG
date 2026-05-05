@@ -57,7 +57,7 @@ public class UpdateProgressViewModel : ViewModelBase
             // Stage 2: Validate contents before touching servers or data
             UpdateStage(2, "Validating update package...");
             var versionFile = VersionFile.Load(effectiveStagingPath);
-            string? newExeInZip = FindFileRecursive(effectiveStagingPath, ExeName);
+            string? newExeInZip = Directory.EnumerateFiles(effectiveStagingPath, ExeName, SearchOption.AllDirectories).FirstOrDefault();
             string stagingServerPath = Path.Join(effectiveStagingPath, ServerDir);
 
             if (versionFile == null || string.IsNullOrWhiteSpace(versionFile.Version)
@@ -222,11 +222,6 @@ public class UpdateProgressViewModel : ViewModelBase
         }
 
         return stagingPath;
-    }
-
-    private static string? FindFileRecursive(string directory, string fileName)
-    {
-        return Directory.EnumerateFiles(directory, fileName, SearchOption.AllDirectories).FirstOrDefault();
     }
 
     private void ReplaceExecutable(string currentExePath, string oldExePath, string newExePath)
