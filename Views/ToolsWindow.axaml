@@ -121,19 +121,6 @@
         </ScrollViewer>
       </TabItem>
 
-      <!-- ── Updates Tab (placeholder) ── -->
-      <!--TabItem Header="Updates">
-        <StackPanel Margin="20" Spacing="12"
-                    VerticalAlignment="Center" HorizontalAlignment="Center">
-          <TextBlock FontSize="16" FontWeight="Bold" HorizontalAlignment="Center">
-            Updates
-          </TextBlock>
-          <TextBlock Foreground="#888888" HorizontalAlignment="Center"
-                     TextWrapping="Wrap" TextAlignment="Center">
-            Update functionality will appear here in a future release.
-          </TextBlock>
-        </StackPanel>
-      </TabItem-->
 
     </TabControl>
   </DockPanel>
