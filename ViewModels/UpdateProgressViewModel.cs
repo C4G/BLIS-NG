@@ -1,10 +1,14 @@
 using System.Diagnostics;
 using System.IO.Compression;
-using ReactiveUI;
+
 using Avalonia.Media;
+
 using BLIS_NG.Config;
 using BLIS_NG.Server;
+
 using Microsoft.Extensions.Logging;
+
+using ReactiveUI;
 
 namespace BLIS_NG.ViewModels;
 
@@ -48,8 +52,7 @@ public class UpdateProgressViewModel : ViewModelBase
             UpdateStage(1, "Unpacking ZIP file...");
             _logger.LogInformation("Starting update from ZIP: {ZipPath}", zipPath);
             string stagingPath = Path.Join(baseDir, StagingDir);
-            string effectiveStagingPath = "";
-            await Task.Run(() => effectiveStagingPath = UnpackZip(zipPath, stagingPath));
+            string effectiveStagingPath = await UnpackZip(zipPath, stagingPath);
 
             // Stage 2: Validate contents before touching servers or data
             UpdateStage(2, "Validating update package...");
@@ -184,7 +187,7 @@ public class UpdateProgressViewModel : ViewModelBase
     /// If the ZIP contains a single root folder, returns that folder's path
     /// so the rest of the code doesn't need to know about the ZIP's internal structure.
     /// </summary>
-    private string UnpackZip(string zipPath, string stagingPath)
+    private async Task<string> UnpackZip(string zipPath, string stagingPath, CancellationToken cancellationToken = default)
     {
         if (Directory.Exists(stagingPath))
         {
@@ -193,7 +196,20 @@ public class UpdateProgressViewModel : ViewModelBase
         }
 
         _logger.LogInformation("Extracting ZIP to {StagingPath}.", stagingPath);
-        ZipFile.ExtractToDirectory(zipPath, stagingPath);
+
+        using var zipFile = await ZipFile.OpenReadAsync(zipPath, cancellationToken);
+        foreach (var entry in zipFile.Entries)
+        {
+            var outPath = Path.Join(stagingPath, entry.FullName);
+            var basePath = Path.GetDirectoryName(outPath);
+            if (!string.IsNullOrWhiteSpace(basePath))
+            {
+                Directory.CreateDirectory(basePath);
+            }
+            await entry.ExtractToFileAsync(outPath, cancellationToken);
+            _logger.LogDebug("{FileName}", entry.FullName);
+        }
+
         _logger.LogInformation("ZIP extraction completed.");
 
         // If the ZIP had a single root folder, use that as the effective staging root
@@ -273,9 +289,17 @@ public class UpdateProgressViewModel : ViewModelBase
     {
         Directory.CreateDirectory(target);
         foreach (string file in Directory.GetFiles(source))
+        {
+            if (new FileInfo(file).LinkTarget != null)
+            {
+                continue;
+            }
             File.Copy(file, Path.Join(target, Path.GetFileName(file)), true);
+        }
         foreach (string dir in Directory.GetDirectories(source))
+        {
             CopyDirectoryRecursive(dir, Path.Join(target, Path.GetFileName(dir)));
+        }
     }
 
     /// <summary>

@@ -1,39 +1,39 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:BLIS_NG.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="600"
-        x:CompileBindings="True"
-        x:DataType="vm:ToolsWindowViewModel"
-        x:Class="BLIS_NG.Views.ToolsWindow"
-        Title="BLIS Tools"
-        Width="480"
-        Height="620"
-        CanResize="False"
-        WindowStartupLocation="CenterOwner">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:BLIS_NG.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="600"
+    x:CompileBindings="True"
+    x:DataType="vm:ToolsWindowViewModel"
+    x:Class="BLIS_NG.Views.ToolsWindow"
+    Title="BLIS Tools"
+    Width="480"
+    Height="620"
+    CanResize="False"
+    WindowStartupLocation="CenterOwner">
 
-  <DockPanel>
+    <DockPanel>
 
-    <Border DockPanel.Dock="Top" Background="#005A9C" Padding="16 12">
-      <TextBlock Foreground="White" FontSize="16" FontWeight="SemiBold">BLIS Tools</TextBlock>
-    </Border>
+        <Border DockPanel.Dock="Top" Background="#005A9C" Padding="16 12">
+            <TextBlock Foreground="White" FontSize="16" FontWeight="SemiBold">BLIS Tools</TextBlock>
+        </Border>
 
-    <TabControl>
+        <TabControl>
 
-      <!-- ── Password Reset Tab ── -->
-      <TabItem Header="Password Reset">
-        <ScrollViewer>
-          <StackPanel Margin="20" Spacing="12"
-                      DataContext="{Binding PasswordResetViewModel}">
+            <!-- ── Password Reset Tab ── -->
+            <TabItem Header="Password Reset">
+                <ScrollViewer>
+                    <StackPanel Margin="20" Spacing="12"
+                        DataContext="{Binding PasswordResetViewModel}">
 
-            <TextBlock FontSize="16" FontWeight="Bold">Reset User Password</TextBlock>
+                        <TextBlock FontSize="16" FontWeight="Bold">Reset User Password</TextBlock>
 
-            <!-- Step 1: Target user details -->
-            <StackPanel Spacing="10" IsVisible="{Binding IsStep1Visible}">
+                        <!-- Step 1: Target user details -->
+                        <StackPanel Spacing="10" IsVisible="{Binding IsStep1Visible}">
 
-              <StackPanel Spacing="4">
-                <TextBlock>Username to Reset</TextBlock>
+                            <StackPanel Spacing="4">
+                                <TextBlock>Username to Reset</TextBlock>
                                 <TextBox Text="{Binding Username}" PlaceholderText="Enter username" />
                             </StackPanel>
 
@@ -57,71 +57,72 @@
                                     PlaceholderText="Enter new password (min. 20 chars)" />
 
                                 <!-- Strength meter -->
-                <StackPanel Spacing="2" IsVisible="{Binding NewPassword, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                  <Grid ColumnDefinitions="*,Auto">
-                    <Border Grid.Column="0" Background="#E0E0E0" CornerRadius="3" Height="6">
-                      <Border CornerRadius="3" Height="6"
-                              HorizontalAlignment="Left"
-                              Width="{Binding PasswordStrengthWidth}"
-                              Background="{Binding PasswordStrengthColor}"/>
-                    </Border>
-                    <TextBlock Grid.Column="1" Margin="8 0 0 0"
-                               FontSize="11" FontWeight="SemiBold"
-                               Foreground="{Binding PasswordStrengthColor}"
-                               Text="{Binding PasswordStrengthLabel}"/>
-                  </Grid>
-                </StackPanel>
-              </StackPanel>
+                                <StackPanel Spacing="2"
+                                    IsVisible="{Binding NewPassword, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Border Grid.Column="0" Background="#E0E0E0"
+                                            CornerRadius="3" Height="6">
+                                            <Border CornerRadius="3" Height="6"
+                                                HorizontalAlignment="Left"
+                                                Width="{Binding PasswordStrengthWidth}"
+                                                Background="{Binding PasswordStrengthColor}" />
+                                        </Border>
+                                        <TextBlock Grid.Column="1" Margin="8 0 0 0"
+                                            FontSize="11" FontWeight="SemiBold"
+                                            Foreground="{Binding PasswordStrengthColor}"
+                                            Text="{Binding PasswordStrengthLabel}" />
+                                    </Grid>
+                                </StackPanel>
+                            </StackPanel>
 
-              <StackPanel Spacing="4">
-                <TextBlock>Confirm Password</TextBlock>
-                <TextBox Text="{Binding ConfirmPassword}" PasswordChar="●"
+                            <StackPanel Spacing="4">
+                                <TextBlock>Confirm Password</TextBlock>
+                                <TextBox Text="{Binding ConfirmPassword}" PasswordChar="●"
                                     PlaceholderText="Confirm new password" />
-              </StackPanel>
+                            </StackPanel>
 
-            </StackPanel>
+                        </StackPanel>
 
                         <!-- Step 2: Supervisor verification -->
-            <StackPanel Spacing="10" IsVisible="{Binding IsStep2Visible}">
-              <Border Background="#FFF8E1" CornerRadius="4" Padding="10">
-                <TextBlock TextWrapping="Wrap" Foreground="#7B5800" FontStyle="Italic">
-                  A higher-ranked user must authorize this password reset.
-                </TextBlock>
-              </Border>
-              <StackPanel Spacing="4">
-                <TextBlock>Supervisor Username</TextBlock>
-                <TextBox Text="{Binding SupervisorUsername}"
+                        <StackPanel Spacing="10" IsVisible="{Binding IsStep2Visible}">
+                            <Border Background="#FFF8E1" CornerRadius="4" Padding="10">
+                                <TextBlock TextWrapping="Wrap" Foreground="#7B5800"
+                                    FontStyle="Italic">
+                                    A higher-ranked user must authorize this password reset.
+                                </TextBlock>
+                            </Border>
+                            <StackPanel Spacing="4">
+                                <TextBlock>Supervisor Username</TextBlock>
+                                <TextBox Text="{Binding SupervisorUsername}"
                                     PlaceholderText="Enter supervisor username" />
-              </StackPanel>
-              <StackPanel Spacing="4">
-                <TextBlock>Supervisor Password</TextBlock>
-                <TextBox Text="{Binding SupervisorPassword}" PasswordChar="●"
+                            </StackPanel>
+                            <StackPanel Spacing="4">
+                                <TextBlock>Supervisor Password</TextBlock>
+                                <TextBox Text="{Binding SupervisorPassword}" PasswordChar="●"
                                     PlaceholderText="Enter supervisor password" />
-              </StackPanel>
-            </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
 
                         <!-- Feedback -->
-            <TextBlock Foreground="Red" Text="{Binding ErrorMessage}"
-                       IsVisible="{Binding HasError}" TextWrapping="Wrap"/>
-            <TextBlock Foreground="Green" Text="{Binding SuccessMessage}"
-                       IsVisible="{Binding HasSuccess}" TextWrapping="Wrap"/>
+                        <TextBlock Foreground="Red" Text="{Binding ErrorMessage}"
+                            IsVisible="{Binding HasError}" TextWrapping="Wrap" />
+                        <TextBlock Foreground="Green" Text="{Binding SuccessMessage}"
+                            IsVisible="{Binding HasSuccess}" TextWrapping="Wrap" />
 
                         <!-- Action buttons -->
-            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
-              <Button Width="120" Command="{Binding ProceedToVerifyCommand}"
-                      IsVisible="{Binding IsStep1Visible}">Next →</Button>
-              <Button Width="80" Command="{Binding BackCommand}"
-                      IsVisible="{Binding IsStep2Visible}">← Back</Button>
-              <Button Width="130" Command="{Binding ConfirmResetCommand}"
-                      IsVisible="{Binding IsStep2Visible}">Confirm Reset</Button>
-              <Button Width="100" Command="{Binding CancelCommand}">Reset Form</Button>
-            </StackPanel>
-
-          </StackPanel>
-        </ScrollViewer>
-      </TabItem>
-
-
-    </TabControl>
-  </DockPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="10"
+                            HorizontalAlignment="Right">
+                            <Button Width="120" Command="{Binding ProceedToVerifyCommand}"
+                                IsVisible="{Binding IsStep1Visible}">Next →</Button>
+                            <Button Width="80" Command="{Binding BackCommand}"
+                                IsVisible="{Binding IsStep2Visible}">← Back</Button>
+                            <Button Width="130" Command="{Binding ConfirmResetCommand}"
+                                IsVisible="{Binding IsStep2Visible}">Confirm Reset</Button>
+                            <Button Width="100" Command="{Binding CancelCommand}">Reset Form</Button>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
 </Window>
