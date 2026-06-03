@@ -58,3 +58,7 @@ nunit-*.xml
 
 # Test harness
 /test/*
+
+# appsettings files - written by the application on close
+# default values should be changed in AppSettings.cs
+/appsettings.json
