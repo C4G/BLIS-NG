@@ -277,9 +277,9 @@ public class PasswordResetViewModel : ViewModelBase
         {
             SuccessMessage = $"Password for '{Username}' was reset successfully. This window will close soon.";
 
-            _ = System.Threading.Tasks.Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
-                await System.Threading.Tasks.Task.Delay(5000);
+                await Task.Delay(5000);
 
                 Avalonia.Threading.Dispatcher.UIThread.Post(() =>
                 {

@@ -44,7 +44,7 @@ public class UpdateProgressViewModel : ViewModelBase
 
     public async Task StartUpdate(string zipPath, Action onComplete)
     {
-        string baseDir = ConfigurationFile.ResolveBaseDirectory();
+        string baseDir = AppSettings.ResolveBaseDirectory();
 
         try
         {
@@ -305,7 +305,7 @@ public class UpdateProgressViewModel : ViewModelBase
     {
         try
         {
-            string baseDir = ConfigurationFile.ResolveBaseDirectory();
+            string baseDir = AppSettings.ResolveBaseDirectory();
 
             string oldExePath = Path.Join(baseDir, OldExeName);
             if (File.Exists(oldExePath))

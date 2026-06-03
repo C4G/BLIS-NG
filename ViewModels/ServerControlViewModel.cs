@@ -2,19 +2,37 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Reactive;
 using Avalonia.Controls.ApplicationLifetimes;
-using BLIS_NG.Config;
 using Avalonia.Platform.Storage;
-using BLIS_NG.Server;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using BLIS_NG.Config;
 using BLIS_NG.Lang;
+using BLIS_NG.Server;
 
 namespace BLIS_NG.ViewModels;
 
-public class LanguageOption(string code, string displayName)
+public class LanguageOption(LanguagePreference language)
 {
-    public string Code { get; } = code;
-    public string DisplayName { get; } = displayName;
+    public string Code { get => language.ToString().ToLowerInvariant(); }
+    public string DisplayName { get => language.DisplayName(); }
+    public LanguagePreference Language { get => language; }
+
+    private readonly LanguagePreference language = language;
+
+    public override bool Equals(object? obj)
+    {
+        if (obj == null || obj is not LanguageOption opt)
+        {
+            return false;
+        }
+
+        return language == opt.language;
+    }
+
+    public override int GetHashCode()
+    {
+        return language.GetHashCode();
+    }
 }
 
 public class ServerControlViewModel : ViewModelBase
@@ -46,6 +64,7 @@ public class ServerControlViewModel : ViewModelBase
     private readonly IMainServer mainServer;
     private readonly IClassicDesktopStyleApplicationLifetime _lifetime;
     private readonly ToolsWindowViewModel _toolsWindowViewModel;
+    private readonly AppSettings appSettings;
 
     public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
     public ReactiveCommand<Unit, Unit> StopServerCommand { get; }
@@ -107,7 +126,7 @@ public class ServerControlViewModel : ViewModelBase
             CultureInfo.CurrentCulture = culture;
             CultureInfo.CurrentUICulture = culture;
             Resources.Culture = culture;
-            LanguagePreferences.SaveLanguageCode(value.Code);
+            appSettings.Language = value.Language;
             RefreshLocalizedUi();
         }
     }
@@ -117,27 +136,25 @@ public class ServerControlViewModel : ViewModelBase
         ILoggerFactory loggerFactory,
         IMainServer mainServer,
         IClassicDesktopStyleApplicationLifetime lifetime,
-        ToolsWindowViewModel toolsWindowViewModel)
+        ToolsWindowViewModel toolsWindowViewModel,
+        AppSettings appSettings)
     {
         this.logger = logger;
         _loggerFactory = loggerFactory;
         this.mainServer = mainServer;
         _lifetime = lifetime;
         _toolsWindowViewModel = toolsWindowViewModel;
+        this.appSettings = appSettings;
 
         StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
         StopServerCommand = ReactiveCommand.Create(HandleStopButtonClick);
         OpenPasswordResetCommand = ReactiveCommand.Create(HandleOpenPasswordReset);
         SelectZipCommand = ReactiveCommand.CreateFromTask(HandleSelectZipClick);
 
-        AvailableLanguages =
-        [
-            new("en", "English"),
-            new("fr", "Francais"),
-        ];
+        AvailableLanguages = [.. Enum.GetValues<LanguagePreference>().Select(p => new LanguageOption(p))];
 
-        var savedLanguageCode = LanguagePreferences.GetLanguageCode();
-        SelectedLanguage = AvailableLanguages.FirstOrDefault(x => x.Code == savedLanguageCode) ?? AvailableLanguages[0];
+        var savedLanguageCode = new LanguageOption(appSettings.Language);
+        SelectedLanguage = AvailableLanguages.FirstOrDefault(x => x == savedLanguageCode) ?? AvailableLanguages[0];
         _initializingLanguageSelection = false;
         RefreshLocalizedUi();
     }
