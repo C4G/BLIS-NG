@@ -12,7 +12,7 @@ using ReactiveUI;
 
 namespace BLIS_NG.ViewModels;
 
-public class UpdateProgressViewModel : ViewModelBase
+public class UpdateProgressViewModel(ILogger<UpdateProgressViewModel> logger, IMainServer mainServer) : ViewModelBase
 {
     private const string ExeName = "BLIS-NG.exe";
     private const string OldExeName = "BLIS-NG.exe.old";
@@ -21,8 +21,8 @@ public class UpdateProgressViewModel : ViewModelBase
     private const string ReleasesDir = "releases";
     private const string BackupsDir = "backups";
 
-    private readonly ILogger<UpdateProgressViewModel> _logger;
-    private readonly IMainServer _mainServer;
+    private readonly ILogger<UpdateProgressViewModel> _logger = logger;
+    private readonly IMainServer _mainServer = mainServer;
 
     private string _currentStageText = "Initializing...";
     private string _statusMessage = "Update In Progress";
@@ -35,12 +35,6 @@ public class UpdateProgressViewModel : ViewModelBase
     public IBrush StatusColor { get => _statusColor; set => this.RaiseAndSetIfChanged(ref _statusColor, value); }
 
     private const int TotalStages = 10;
-
-    public UpdateProgressViewModel(ILogger<UpdateProgressViewModel> logger, IMainServer mainServer)
-    {
-        _logger = logger;
-        _mainServer = mainServer;
-    }
 
     public async Task StartUpdate(string zipPath, Action onComplete)
     {
