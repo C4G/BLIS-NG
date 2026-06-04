@@ -30,6 +30,7 @@ public static class ServiceCollectionExtensions
       .AddSingleton<PasswordResetViewModel>()
       .AddSingleton<ToolsWindowViewModel>()
       .AddSingleton<ServerControlViewModel>()
-      .AddSingleton<MainWindowViewModel>();
-  }
+      .AddSingleton<MainWindowViewModel>()
+      .AddSingleton<UpdateProgressViewModel>();
+    }
 }

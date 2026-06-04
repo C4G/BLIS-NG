@@ -13,26 +13,10 @@ namespace BLIS_NG.ViewModels;
 
 public class LanguageOption(LanguagePreference language)
 {
-    public string Code { get => language.ToString().ToLowerInvariant(); }
-    public string DisplayName { get => language.DisplayName(); }
-    public LanguagePreference Language { get => language; }
+    public string Code { get => Language.ToString().ToLowerInvariant(); }
+    public string DisplayName { get => Language.DisplayName(); }
 
-    private readonly LanguagePreference language = language;
-
-    public override bool Equals(object? obj)
-    {
-        if (obj == null || obj is not LanguageOption opt)
-        {
-            return false;
-        }
-
-        return language == opt.language;
-    }
-
-    public override int GetHashCode()
-    {
-        return language.GetHashCode();
-    }
+    public readonly LanguagePreference Language = language;
 }
 
 public class ServerControlViewModel : ViewModelBase
@@ -60,10 +44,10 @@ public class ServerControlViewModel : ViewModelBase
     public static string LanguageLabel => Resources.Label_Language;
 
     private readonly ILogger<ServerControlViewModel> logger;
-    private readonly ILoggerFactory _loggerFactory;
     private readonly IMainServer mainServer;
-    private readonly IClassicDesktopStyleApplicationLifetime _lifetime;
-    private readonly ToolsWindowViewModel _toolsWindowViewModel;
+    private readonly IClassicDesktopStyleApplicationLifetime applicationLifetime;
+    private readonly ToolsWindowViewModel toolsWindowViewModel;
+    private readonly UpdateProgressViewModel updateProgressViewModel;
     private readonly AppSettings appSettings;
 
     public ReactiveCommand<Unit, Unit> StartServerCommand { get; }
@@ -82,7 +66,6 @@ public class ServerControlViewModel : ViewModelBase
 #endif
     }
 
-    private readonly bool _initializingLanguageSelection = true;
     private UiStatusState _currentStatusState = UiStatusState.Stopped;
 
     private string _status = string.Empty;
@@ -115,7 +98,7 @@ public class ServerControlViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _selectedLanguage, value);
-            if (_initializingLanguageSelection || value == null)
+            if (value == null)
             {
                 return;
             }
@@ -133,17 +116,17 @@ public class ServerControlViewModel : ViewModelBase
 
     public ServerControlViewModel(
         ILogger<ServerControlViewModel> logger,
-        ILoggerFactory loggerFactory,
         IMainServer mainServer,
-        IClassicDesktopStyleApplicationLifetime lifetime,
+        IClassicDesktopStyleApplicationLifetime applicationLifetime,
         ToolsWindowViewModel toolsWindowViewModel,
+        UpdateProgressViewModel updateProgressViewModel,
         AppSettings appSettings)
     {
         this.logger = logger;
-        _loggerFactory = loggerFactory;
         this.mainServer = mainServer;
-        _lifetime = lifetime;
-        _toolsWindowViewModel = toolsWindowViewModel;
+        this.applicationLifetime = applicationLifetime;
+        this.toolsWindowViewModel = toolsWindowViewModel;
+        this.updateProgressViewModel = updateProgressViewModel;
         this.appSettings = appSettings;
 
         StartServerCommand = ReactiveCommand.Create(HandleStartButtonClick);
@@ -152,10 +135,9 @@ public class ServerControlViewModel : ViewModelBase
         SelectZipCommand = ReactiveCommand.CreateFromTask(HandleSelectZipClick);
 
         AvailableLanguages = [.. Enum.GetValues<LanguagePreference>().Select(p => new LanguageOption(p))];
-
         var savedLanguageCode = new LanguageOption(appSettings.Language);
-        SelectedLanguage = AvailableLanguages.FirstOrDefault(x => x == savedLanguageCode) ?? AvailableLanguages[0];
-        _initializingLanguageSelection = false;
+        _selectedLanguage = AvailableLanguages.FirstOrDefault(x => x.Code == savedLanguageCode.Code) ?? AvailableLanguages[0];
+
         RefreshLocalizedUi();
     }
 
@@ -283,18 +265,14 @@ public class ServerControlViewModel : ViewModelBase
                     string selectedFile = files[0].Path.LocalPath;
 
                     // Launch the update window logic
-                    var updateLogger = LoggerFactoryExtensions
-                        .CreateLogger<UpdateProgressViewModel>(_loggerFactory);
-                    var updateVm = new UpdateProgressViewModel(updateLogger, mainServer);
                     var updateWindow = new Views.UpdateProgressWindow
                     {
-                        DataContext = updateVm
+                        DataContext = updateProgressViewModel
                     };
-
                     updateWindow.Show(desktop.MainWindow);
 
                     // Start the update process and close window when done
-                    await updateVm.StartUpdate(selectedFile, () => updateWindow.Close());
+                    await updateProgressViewModel.StartUpdate(selectedFile, updateWindow.Close);
                 }
             }
         }
@@ -307,11 +285,11 @@ public class ServerControlViewModel : ViewModelBase
 
     private void HandleOpenPasswordReset()
     {
-        if (_lifetime.MainWindow is null) return;
-        _toolsWindowViewModel.PasswordResetViewModel.ResetForm();
-        var toolsWindow = new Views.ToolsWindow(_toolsWindowViewModel);
-        //close window action after successful reset
-        _toolsWindowViewModel.PasswordResetViewModel.RequestClose = () => toolsWindow.Close();
-        toolsWindow.ShowDialog(_lifetime.MainWindow);
+        if (applicationLifetime.MainWindow is null) return;
+        toolsWindowViewModel.PasswordResetViewModel.ResetForm();
+        var toolsWindow = new Views.ToolsWindow(toolsWindowViewModel);
+        // close window action after successful reset
+        toolsWindowViewModel.PasswordResetViewModel.RequestClose = () => toolsWindow.Close();
+        toolsWindow.ShowDialog(applicationLifetime.MainWindow);
     }
 }
