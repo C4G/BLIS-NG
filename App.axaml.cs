@@ -21,11 +21,16 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        IConfiguration configuration = new ConfigurationBuilder()
-            .AddJsonFile(AppSettings.ConfigPath())
+        var configBuilder = new ConfigurationBuilder();
+        if (File.Exists(AppSettings.ConfigPath()))
+        {
+            configBuilder.AddJsonFile(AppSettings.ConfigPath());
+        }
+        configBuilder
             .AddEnvironmentVariables()
-            .AddCommandLine(Environment.GetCommandLineArgs())
-            .Build();
+            .AddCommandLine(Environment.GetCommandLineArgs());
+
+        var configuration = configBuilder.Build();
 
         AppSettings appSettings = configuration.GetSection(AppSettings.LauncherSettings).Get<AppSettings>() ?? new AppSettings();
 
