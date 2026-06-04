@@ -9,9 +9,10 @@ namespace BLIS_NG.Server;
 /// </summary>
 public class MySqlAdmin(ILogger<MySqlAdmin> logger, MySqlIni mySqlIni) : BaseProcess(nameof(MySqlAdmin), logger, singleton: false)
 {
-    public readonly string MysqlAdminPath = Path.Combine(
-      mySqlIni.SERVER_BASE_DIR, "mysql", "bin", "mysqladmin.exe"
+    public readonly string MysqlAdminPath = Path.Join(
+        mySqlIni.SERVER_BASE_DIR, "mysql", "bin", "mysqladmin.exe"
     );
+
 
     private readonly ILogger<MySqlAdmin> logger = logger;
     private readonly string baseArguments = $"-u{MySqlIni.MYSQL_ROOT_USER} -p{MySqlIni.MYSQL_ROOT_PASSWORD} -h {MySqlIni.MYSQL_BIND_ADDRESS} --port {MySqlIni.MYSQL_PORT}";
@@ -31,6 +32,10 @@ public class MySqlAdmin(ILogger<MySqlAdmin> logger, MySqlIni mySqlIni) : BasePro
 
     public async Task Shutdown()
     {
-        await Execute(MysqlAdminPath, $"{baseArguments} shutdown", null, (stdout) => logger.LogInformation("{Message}", stdout), (stderr) => logger.LogWarning("{Message}", stderr));
+        await Execute(MysqlAdminPath, $"{baseArguments} shutdown", null,
+            (stdout) => logger.LogInformation("{Message}", stdout),
+            (stderr) => logger.LogWarning("{Message}", stderr));
     }
+
+
 }

@@ -14,48 +14,20 @@ public abstract class ConfigurationFile
     private readonly FluidParser parser = new();
     private readonly Uri templatePath;
 
-    private static string? workingDirectory = null;
-    public static string ResolveBaseDirectory()
-    {
-        if (workingDirectory != null)
-        {
-            return workingDirectory;
-        }
-
-        var args = Environment.GetCommandLineArgs();
-        for (int i = 0; i < args.Length; i++)
-        {
-            if (string.Equals(args[i], "--WorkingDirectory") && i < (args.Length - 1))
-            {
-                workingDirectory = Path.GetFullPath(new Uri(args[i + 1]).LocalPath);
-                break;
-            }
-        }
-
-        if (workingDirectory == null || !Path.Exists(workingDirectory))
-        {
-            workingDirectory = Directory.GetCurrentDirectory();
-        }
-
-        Console.WriteLine($"Working directory: {workingDirectory}");
-
-        return workingDirectory;
-    }
-
     public ConfigurationFile(Uri templatePath)
     {
         this.templatePath = templatePath;
 
-        BASE_DIR = ResolveBaseDirectory();
-        SERVER_BASE_DIR = Path.Combine(BASE_DIR, "server");
+        BASE_DIR = AppSettings.ResolveBaseDirectory();
+        SERVER_BASE_DIR = Path.Join(BASE_DIR, "server");
 
-        TMP_DIR = Path.Combine(SERVER_BASE_DIR, "tmp");
+        TMP_DIR = Path.Join(SERVER_BASE_DIR, "tmp");
         if (!Path.Exists(TMP_DIR))
         {
             Directory.CreateDirectory(TMP_DIR);
         }
 
-        LOG_DIR = Path.Combine(BASE_DIR, "log");
+        LOG_DIR = Path.Join(BASE_DIR, "log");
         if (!Path.Exists(LOG_DIR))
         {
             Directory.CreateDirectory(LOG_DIR);

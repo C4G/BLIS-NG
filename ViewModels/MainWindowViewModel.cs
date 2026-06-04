@@ -1,27 +1,28 @@
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using BLIS_NG.Config;
 
 namespace BLIS_NG.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    public static string WindowTitle { get => ServerControlViewModel.AppVersion; }
-
     public static WindowState WindowState { get; set; }
 
     public ServerControlViewModel ServerControlViewModel { get; init; }
 
     private IApplicationLifetime? ApplicationLifetime { get; init; }
+    private readonly AppSettings appSettings;
 
-    public MainWindowViewModel(IApplicationLifetime? lifetime, ServerControlViewModel serverControlViewModel)
+    public MainWindowViewModel(IApplicationLifetime? lifetime, ServerControlViewModel serverControlViewModel, AppSettings appSettings)
     {
         ApplicationLifetime = lifetime;
+        this.appSettings = appSettings;
         ServerControlViewModel = serverControlViewModel;
 
         // BLIS doesn't (yet) run on non-Windows platforms,
         // so don't attempt to open it in the browser if we're not
         // on Windows.
-        if (OperatingSystem.IsWindows())
+        if (appSettings.OpenBrowserOnStart && OperatingSystem.IsWindows())
         {
             // Start BLIS on app start
             ServerControlViewModel.HandleStartButtonClick();
@@ -35,6 +36,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public bool Shutdown()
     {
+        appSettings.Write();
         ServerControlViewModel.HandleStopButtonClick();
         return !ServerControlViewModel.ProbablyRunning;
     }

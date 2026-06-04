@@ -18,8 +18,8 @@ public class MySqlIni : ConfigurationFile
 
     public MySqlIni() : base(new Uri("avares://BLIS-NG/Assets/Templates/my.ini.liquid"))
     {
-        CONFIG_FILE_PATH = Path.Combine(SERVER_BASE_DIR, "mysql", "my.ini");
-        MYSQL_DBDIR = Path.Combine(BASE_DIR, "dbdir");
+        CONFIG_FILE_PATH = Path.Join(SERVER_BASE_DIR, "mysql", "my.ini");
+        MYSQL_DBDIR = Path.Join(BASE_DIR, "dbdir");
     }
 
     public override void Write()

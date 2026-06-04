@@ -10,6 +10,7 @@
       "type": "coreclr",
       "preLaunchTask": "build",
       "program": "${workspaceFolder}/bin/Debug/net10.0/BLIS-NG.dll",
+      "cwd": "${workspaceFolder}",
       "args": [
         "--WorkingDirectory",
         "${workspaceFolder}/../BLIS/"
