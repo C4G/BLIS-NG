@@ -17,12 +17,6 @@ public class StateFile
     [JsonPropertyName("docroot")]
     public string? Docroot { get; set; }
 
-    [JsonIgnore]
-    public string EffectiveDocroot
-    {
-        get => string.IsNullOrEmpty(Docroot) ? $"releases/{ActiveVersion}/htdocs" : Docroot;
-    }
-
     /// <summary>
     /// Reads state.json from the base directory. Returns defaults if the file is missing or invalid.
     /// </summary>
@@ -45,14 +39,15 @@ public class StateFile
         }
     }
 
+    private static readonly JsonSerializerOptions jsonSerializerOptions = new() { WriteIndented = true };
+
     /// <summary>
     /// Writes state.json to the base directory.
     /// </summary>
     public void Save(string baseDir)
     {
         var path = Path.Join(baseDir, FileName);
-        var options = new JsonSerializerOptions { WriteIndented = true };
-        var json = JsonSerializer.Serialize(this, options);
+        var json = JsonSerializer.Serialize(this, jsonSerializerOptions);
         File.WriteAllText(path, json);
     }
 }

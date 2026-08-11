@@ -2,7 +2,7 @@ namespace BLIS_NG.Config;
 
 public class HttpdConf : ConfigurationFile
 {
-    // Bind to all interfaces (IPv4) since many labs 
+    // Bind to all interfaces (IPv4) since many labs likely do not support IPv6
     public const string APACHE2_BIND_ADDRESS = "0.0.0.0";
     public const int APACHE2_PORT = 8080;
 
@@ -20,7 +20,7 @@ public class HttpdConf : ConfigurationFile
         CONFIG_FILE_PATH = Path.Join(APACHE2_BASE, "conf", "httpd.conf");
 
         var state = StateFile.Load(BASE_DIR);
-        DOCROOT = Path.Join(BASE_DIR, state.EffectiveDocroot);
+        DOCROOT = EffectiveDocroot(BASE_DIR, state);
 
         PID_FILE = Path.Join(TMP_DIR, "httpd.pid");
         LOCAL_DIR = Path.Join(BASE_DIR, "local");
@@ -42,5 +42,28 @@ public class HttpdConf : ConfigurationFile
             { "storage_dir", STORAGE_DIR },
             { "data_dir", DATA_DIR }
         });
+    }
+
+    private const string BaseDocroot = "htdocs";
+    private static string EffectiveDocroot(string baseDirectory, StateFile state)
+    {
+        if (!string.IsNullOrEmpty(state.Docroot))
+        {
+            return state.Docroot;
+        }
+
+        string releaseUpdateDirectory = Path.Join(baseDirectory, $"releases/{state.ActiveVersion}/htdocs");
+        if (Directory.Exists(releaseUpdateDirectory))
+        {
+            return releaseUpdateDirectory;
+        }
+
+        string baseDocroot = Path.Join(baseDirectory, BaseDocroot);
+        if (Directory.Exists(baseDocroot))
+        {
+            return baseDocroot;
+        }
+
+        throw new InvalidOperationException("Could not find htdocs/ folder.");
     }
 }
