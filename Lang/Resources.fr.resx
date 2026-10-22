@@ -29,7 +29,7 @@
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="name" use="required" type="xsd:string" />
               <xsd:attribute name="type" type="xsd:string" />
               <xsd:attribute name="mimetype" type="xsd:string" />
               <xsd:attribute ref="xml:space" />
@@ -40,14 +40,13 @@
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="name" use="required" type="xsd:string" />
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -63,65 +62,106 @@
       Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 
-  <data name="App_Title" xml:space="preserve">
-  <value>Système d'information de laboratoire de base (BLIS)</value>
-</data>
-<data name="App_Version_Format" xml:space="preserve">
-  <value>BLIS pour Windows {0}</value>
-</data>
-<data name="App_Tagline" xml:space="preserve">
-  <value>Une initiative conjointe de C4G à Georgia Tech, du CDC et des pays participants.</value>
-</data>
-<data name="App_LicenseNotice" xml:space="preserve">
-  <value>C4G BLIS est sous licence GNU General Public License version 3. Pour plus d'informations, visitez blis.cc.gatech.edu.</value>
-</data>
-<data name="Button_StartBlis" xml:space="preserve">
-  <value>Démarrer BLIS</value>
-</data>
-<data name="Button_StopBlis" xml:space="preserve">
-  <value>Arrêter BLIS</value>
-</data>
-<data name="Status_Healthy" xml:space="preserve">
-  <value>Statut : Fonctionnel</value>
-</data>
-<data name="Status_Starting" xml:space="preserve">
-  <value>Statut : Démarrage en cours</value>
-</data>
-<data name="Status_ApacheHealthcheckFailed" xml:space="preserve">
-  <value>Statut : Échec de la vérification d'état d'Apache2.</value>
-</data>
-<data name="Status_Stopping" xml:space="preserve">
-  <value>Statut : Arrêt en cours</value>
-</data>
-<data name="Status_Stopped" xml:space="preserve">
-  <value>Statut : Arrêté</value>
-</data>
-<data name="Label_Language" xml:space="preserve">
-  <value>Langue :</value>
-</data>
-<data name="Language_English" xml:space="preserve">
-  <value>Anglais</value>
-</data>
-<data name="Language_French" xml:space="preserve">
-  <value>Français</value>
-</data>
-<data name="Message_RestartRequired" xml:space="preserve">
-  <value>Langue mise à jour. Redémarrez le lanceur pour appliquer tous les changements de texte.</value>
-</data>
-<data name="Button_MoreOptions" xml:space="preserve">
-  <value>Plus d'options</value>
-</data>
-<data name="Menu_UpdateWithZipFile" xml:space="preserve">
-  <value>Mettre à jour avec un fichier ZIP</value>
-</data>
-<data name="Menu_ResetPassword" xml:space="preserve">
-  <value>Réinitialiser le mot de passe</value>
-</data>
-<data name="Picker_SelectZipFile" xml:space="preserve">
-  <value>Sélectionner un fichier ZIP</value>
-</data>
-<data name="Picker_ZipFiles" xml:space="preserve">
-  <value>Fichiers ZIP</value>
-</data>
+  <!-- ── MainWindow ── -->
+  <data name="AppTitle" xml:space="preserve">
+    <value>Système d'Information de Laboratoire de Base (BLIS)</value>
+  </data>
+  <data name="AppJointInitiative" xml:space="preserve">
+    <value>Une initiative conjointe de C4G à Georgia Tech, le CDC et les pays participants.</value>
+  </data>
+  <data name="AppLicense" xml:space="preserve">
+    <value>C4G BLIS est distribué sous la licence publique générale GNU version 3. Pour plus d'informations, visitez blis.cc.gatech.edu.</value>
+  </data>
+  <data name="StartBlis" xml:space="preserve">
+    <value>Démarrer BLIS</value>
+  </data>
+  <data name="StopBlis" xml:space="preserve">
+    <value>Arrêter BLIS</value>
+  </data>
+
+  <!-- ── ToolsWindow ── -->
+  <data name="ToolsWindowTitle" xml:space="preserve">
+    <value>Outils BLIS</value>
+  </data>
+  <data name="TabPasswordReset" xml:space="preserve">
+    <value>Réinitialisation du mot de passe</value>
+  </data>
+  <data name="ResetUserPassword" xml:space="preserve">
+    <value>Réinitialiser le mot de passe</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Réinitialiser le mot de passe</value>
+  </data>
+  <data name="UsernameToReset" xml:space="preserve">
+    <value>Nom d'utilisateur à réinitialiser</value>
+  </data>
+  <data name="EnterUsername" xml:space="preserve">
+    <value>Entrer le nom d'utilisateur</value>
+  </data>
+  <data name="PasswordRequirements" xml:space="preserve">
+    <value>Exigences du mot de passe</value>
+  </data>
+  <data name="PasswordReqLength" xml:space="preserve">
+    <value>• Au moins 20 caractères</value>
+  </data>
+  <data name="PasswordReqClasses" xml:space="preserve">
+    <value>• Au moins 2 parmi : majuscules, minuscules, chiffres, symboles</value>
+  </data>
+  <data name="PasswordReqSymbols" xml:space="preserve">
+    <value>• Exemples de symboles : ! @ # $ % ^ &amp; *</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Nouveau mot de passe</value>
+  </data>
+  <data name="EnterNewPassword" xml:space="preserve">
+    <value>Entrer le nouveau mot de passe (min. 20 caractères)</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Confirmer le mot de passe</value>
+  </data>
+  <data name="ConfirmNewPassword" xml:space="preserve">
+    <value>Confirmer le nouveau mot de passe</value>
+  </data>
+  <data name="SupervisorAuthNotice" xml:space="preserve">
+    <value>Un utilisateur de rang supérieur doit autoriser cette réinitialisation.</value>
+  </data>
+  <data name="SupervisorUsername" xml:space="preserve">
+    <value>Nom d'utilisateur du superviseur</value>
+  </data>
+  <data name="EnterSupervisorUsername" xml:space="preserve">
+    <value>Entrer le nom du superviseur</value>
+  </data>
+  <data name="SupervisorPassword" xml:space="preserve">
+    <value>Mot de passe du superviseur</value>
+  </data>
+  <data name="EnterSupervisorPassword" xml:space="preserve">
+    <value>Entrer le mot de passe du superviseur</value>
+  </data>
+  <data name="ButtonNext" xml:space="preserve">
+    <value>Suivant →</value>
+  </data>
+  <data name="ButtonBack" xml:space="preserve">
+    <value>← Retour</value>
+  </data>
+  <data name="ButtonConfirmReset" xml:space="preserve">
+    <value>Confirmer la réinitialisation</value>
+  </data>
+  <data name="ButtonResetForm" xml:space="preserve">
+    <value>Réinitialiser le formulaire</value>
+  </data>
+
+  <!-- ── PasswordResetDialog ── -->
+  <data name="Username" xml:space="preserve">
+    <value>Nom d'utilisateur</value>
+  </data>
+  <data name="EnterNewPasswordShort" xml:space="preserve">
+    <value>Entrer le nouveau mot de passe</value>
+  </data>
+  <data name="ButtonReset" xml:space="preserve">
+    <value>Réinitialiser</value>
+  </data>
+  <data name="ButtonCancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
 
 </root>
